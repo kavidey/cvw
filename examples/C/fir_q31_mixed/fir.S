@@ -23,18 +23,20 @@ fir:
     # x_index = j - i + (m-1) => x_index = j + (m-1) and subtract 1 each loop iteration
     andi t5, zero, 0
     addi t5, a4, -4 # x_index = m-1
+    # add array index base addresses to loop comparison
+    # m = m + &c
+    add a4, a4, a1
 outer_for:
     bgt s0, a3, done # if j > (n-m) done
     andi t0, zero, 0 # y[j] = 0
     add t1, t5, s0 # t1 = t5 + a4 => t5 = j + (m-1)
     ### inner for loop ###
-    # initialize i = 0
-    andi s1, zero, 0
+    # i = 0
+    add s1, a1, zero
 inner_for:
     bge s1, a4, outer_for_end # if i >= m done
     # load c[i] into t2
-    add t2, s1, a1 # t2 = &c[i]
-    lw t2, 0(t2) # t2 = c[i]
+    lw t2, 0(s1) # t2 = c[i]
     # load x[x_index] into t3
     add t3, t1, a0 # t3 = &x[x_index]
     lw t3, 0(t3) # t3 = x[x_index]
@@ -52,6 +54,7 @@ outer_for_end:
     # save t1 in y[i]
     add t2, s0, a2 # t2 = &y[j]
     sw t0, 0(t2)
+    # reset i index
     # finish loop
     addi s0, s0, 4 # j++
     j outer_for # go back to top of loop

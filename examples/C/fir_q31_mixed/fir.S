@@ -14,6 +14,9 @@ fir:
     ### outer for loop ###
     # a3 stores threshold for outer for loop
     sub a3, a3, a4 # a3 = n - m
+    # multiply indices by 4 to help with array indexing
+    slli a3, a3, 2
+    slli a4, a4, 2
     # addi a3, a3, 1 # a3 += 1; don't add 1 because we are doing a greater than or equal comparison
     # initialize j = 0
     andi s0, zero, 0
@@ -22,37 +25,34 @@ outer_for:
     andi t0, zero, 0 # y[j] = 0
     # x_index = j - i + (m-1) => x_index = j + (m-1) and subtract 1 each loop iteration
     add t1, s0, a4 # x_index = j + m
-    addi t1, t1, -1 # x_index -= 1
-    
+    addi t1, t1, -4 # x_index -= 1
     ### inner for loop ###
     # initialize i = 0
     andi s1, zero, 0
 inner_for:
     bge s1, a4, outer_for_end # if i >= m done
     # load c[i] into t2
-    slli t2, s1, 2 # t2 = 4 * i
-    add t2, t2, a1 # t2 = &c[i]
+    add t2, s1, a1 # t2 = &c[i]
     lw t2, 0(t2) # t2 = c[i]
     # load x[x_index] into t3
-    slli t3, t1, 2 # t3 = 4 * x_index
-    add t3, t3, a0 # t3 = &x[x_index]
+    add t3, t1, a0 # t3 = &x[x_index]
     lw t3, 0(t3) # t3 = x[x_index]
     # mul_q31 t2 t3
-    mul t4, t2, t3 # t4 = c[i] * x[x_index] bits 64:33
+    mul t4, t2, t3 # t4 = c[i] * x[x_index]
     srli t4, t4, 31 # t4 >> 31 (not 32 because we're not shifting left by 1)
+    # add_q31 t0 t4
     add t0, t0, t4 # y[i] = y[i] + t4
     # finish loop
-    addi t1, t1, -1 # x_index =- 1
-    addi s1, s1, 1 # i++
+    addi t1, t1, -4 # x_index =- 1
+    addi s1, s1, 4 # i++
     j inner_for
     ### inner for loop done ###
 outer_for_end:
     # save t1 in y[i]
-    slli t2, s0, 2 # t2 = j * 4
-    add t2, t2, a2 # t2 = &y[j]
+    add t2, s0, a2 # t2 = &y[j]
     sw t0, 0(t2)
     # finish loop
-    addi s0, s0, 1 # j++
+    addi s0, s0, 4 # j++
     j outer_for # go back to top of loop
     ### outer for loop done ###
 done:

@@ -20,12 +20,13 @@ fir:
     # addi a3, a3, 1 # a3 += 1; don't add 1 because we are doing a greater than or equal comparison
     # initialize j = 0
     andi s0, zero, 0
+    # x_index = j - i + (m-1) => x_index = j + (m-1) and subtract 1 each loop iteration
+    andi t5, zero, 0
+    addi t5, a4, -4 # x_index = m-1
 outer_for:
     bgt s0, a3, done # if j > (n-m) done
     andi t0, zero, 0 # y[j] = 0
-    # x_index = j - i + (m-1) => x_index = j + (m-1) and subtract 1 each loop iteration
-    add t1, s0, a4 # x_index = j + m
-    addi t1, t1, -4 # x_index -= 1
+    add t1, t5, s0 # t1 = t5 + a4 => t5 = j + (m-1)
     ### inner for loop ###
     # initialize i = 0
     andi s1, zero, 0

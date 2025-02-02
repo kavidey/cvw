@@ -1,0 +1,62 @@
+// fir.s
+// kdey@hmc.edu 31 January 2025
+// Calculates result of applying FIR filter to input
+
+# a0 x[], a1 c[], a2 y[], a3 n, a4 m
+
+.global fir
+fir:
+    ### setup ###
+    addi sp, sp, -8 # room on stack
+    sw s0, 0(sp) # save s0
+    sw s1, 4(sp) # save s1
+
+    ### outer for loop ###
+    # a3 stores threshold for outer for loop
+    sub a3, a3, a4 # a3 = n - m
+    # addi a3, a3, 1 # a3 += 1; don't add 1 because we are doing a greater than or equal comparison
+    # initialize j = 0
+    andi s0, zero, 0
+outer_for:
+    bgt s0, a3, done # if j > (n-m) done
+    andi t0, zero, 0 # y[j] = 0
+    # x_index = j - i + (m-1) => x_index = j + (m-1) and subtract 1 each loop iteration
+    add t1, s0, a4 # x_index = j + m
+    addi t1, t1, -1 # x_index -= 1
+    
+    ### inner for loop ###
+    # initialize i = 0
+    andi s1, zero, 0
+inner_for:
+    bge s1, a4, outer_for_end # if i >= m done
+    # load c[i] into t2
+    slli t2, s1, 2 # t2 = 4 * i
+    add t2, t2, a1 # t2 = &c[i]
+    lw t2, 0(t2) # t2 = c[i]
+    # load x[x_index] into t3
+    slli t3, t1, 2 # t3 = 4 * x_index
+    add t3, t3, a0 # t3 = &x[x_index]
+    lw t3, 0(t3) # t3 = x[x_index]
+    # mul_q31 t2 t3
+    mul t4, t2, t3 # t4 = c[i] * x[x_index] bits 64:33
+    srli t4, t4, 31 # t4 >> 31 (not 32 because we're not shifting left by 1)
+    add t0, t0, t4 # y[i] = y[i] + t4
+    # finish loop
+    addi t1, t1, -1 # x_index =- 1
+    addi s1, s1, 1 # i++
+    j inner_for
+    ### inner for loop done ###
+outer_for_end:
+    # save t1 in y[i]
+    slli t2, s0, 2 # t2 = j * 4
+    add t2, t2, a2 # t2 = &y[j]
+    sw t0, 0(t2)
+    # finish loop
+    addi s0, s0, 1 # j++
+    j outer_for # go back to top of loop
+    ### outer for loop done ###
+done:
+    lw s1, 4(sp) # restore s1
+    lw s0, 0(sp) # restore s0
+    addi sp, sp, 8 # restore stack
+    ret                 # return from function

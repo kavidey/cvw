@@ -19,13 +19,16 @@ fir:
     slli a4, a4, 2
     # addi a3, a3, 1 # a3 += 1; don't add 1 because we are doing a greater than or equal comparison
     # initialize j = 0
-    andi s0, zero, 0
+    add s0, a2, zero
     # x_index = j - i + (m-1) => x_index = j + (m-1) and subtract 1 each loop iteration
     andi t5, zero, 0
     addi t5, a4, -4 # x_index = m-1
+    sub t5, t5, a2 # subtract &y from x_index in preparation for adding it later when we add j to x_index
     # add array index base addresses to loop comparison
     # m = m + &c
     add a4, a4, a1
+    # a3 = a3 + &y
+    add a3, a3, a2
 outer_for:
     bgt s0, a3, done # if j > (n-m) done
     andi t0, zero, 0 # y[j] = 0
@@ -52,8 +55,7 @@ inner_for:
     ### inner for loop done ###
 outer_for_end:
     # save t1 in y[i]
-    add t2, s0, a2 # t2 = &y[j]
-    sw t0, 0(t2)
+    sw t0, 0(s0)
     # reset i index
     # finish loop
     addi s0, s0, 4 # j++

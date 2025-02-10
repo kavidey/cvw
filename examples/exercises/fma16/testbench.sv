@@ -38,7 +38,7 @@ module testbench_fma16;
     if (~reset) begin // skip during reset
       if (result !== rexpected /* | flags !== flagsexpected */) begin  // check result
         $display("Error: inputs %h * %h + %h", x, y, z);
-        $display("  result = %h (%h expected) flags = %b (%b expected)", 
+        $display("  result = %b (%b expected) flags = %b (%b expected)", 
           result, rexpected, flags, flagsexpected);
         errors = errors + 1;
       end

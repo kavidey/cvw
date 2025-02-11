@@ -318,7 +318,8 @@ def addTestsByDir(testDir, config, sim, coverStr, configs, lockstepMode=0, breke
     sim_logdir = f"{regressionDir}/{sim}/logs/"
     cmdPrefix = f"wsim --sim {sim} {coverStr} {'--lockstep' if lockstepMode else ''} {config}"
     # fcov/ccov only runs on WALLY-COV-ALL.elf files; other lockstep runs on all files
-    fileEnd = "ALL.elf" if "cvw-arch-verif/tests" in testDir and "priv" not in testDir and (coverStr == "--fcov" or coverStr == "--ccov") else ".elf"
+    fileStart = "WALLY-COV-ALL" if "cvw-arch-verif/tests" in testDir and "priv" not in testDir and (coverStr == "--fcov" or coverStr == "--ccov") else ""
+    fileEnd = ".elf"
     if lockstepMode or coverStr == "--fcov":
         gs = "Mismatches            : 0"
     elif brekerMode:
@@ -327,7 +328,7 @@ def addTestsByDir(testDir, config, sim, coverStr, configs, lockstepMode=0, breke
         gs = "Single Elf file tests are not signatured verified."
     for dirpath, _, filenames in os.walk(os.path.abspath(testDir)):
         for file in filenames:
-            if file.endswith(fileEnd):
+            if file.endswith(fileEnd) and file.startswith(fileStart):
                 fullfile = os.path.join(dirpath, file)
                 fields = fullfile.rsplit('/', 3)
                 if fields[2] == "ref":
@@ -392,19 +393,24 @@ def process_args(args):
     # exercise all simulators in nightly; can omit a sim if no license is available
     sims = ["questa", "verilator", "vcs"] if args.nightly else [defaultsim]
     if args.ccov:
+        sims = [coveragesim]
         coverStr = "--ccov"
         TIMEOUT_DUR = 20*60 # seconds
         for d in ["ucdb", "cov"]:
             shutil.rmtree(f"{regressionDir}/questa/{d}", ignore_errors=True)
             os.makedirs(f"{regressionDir}/questa/{d}", exist_ok=True)
     elif args.fcov:
+        sims = [coveragesim]
         coverStr = "--fcov"
         TIMEOUT_DUR = 8*60
         shutil.rmtree(f"{regressionDir}/questa/fcov_ucdb", ignore_errors=True)
         os.makedirs(f"{regressionDir}/questa/fcov_ucdb", exist_ok=True)
     elif args.buildroot:
         TIMEOUT_DUR = 60*1440 # 1 day
-    elif args.testfloat or args.nightly:
+    elif args.testfloat:
+        sims = [testfloatsim]
+        TIMEOUT_DUR = 30*60 # seconds
+    elif args.nightly:
         TIMEOUT_DUR = 30*60 # seconds
     else:
         TIMEOUT_DUR = 10*60 # seconds

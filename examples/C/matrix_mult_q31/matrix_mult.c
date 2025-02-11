@@ -2,8 +2,6 @@
 #include <stdlib.h> // supports rand
 #include "util.h"   // supports verify
 
-#define N 40
-
 // Add two Q1.31 fixed point numbers
 int add_q31(int a, int b) {
     return a + b;
@@ -17,12 +15,14 @@ int mul_q31(int a, int b) {
     return result;
 }
 
-void matrix_mult(int a[N][N], int b[N][N], int c[N][N], int n) {
+void matrix_mult(int a[], int b[], int c[], int n) {
+    int c_index = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            c[i][j] = 0;
+            c_index = n*i + j;
+            c[c_index] = 0;
             for (int k = 0; k < n; k++) {
-                c[i][j] = add_q31(c[i][j], mul_q31(a[i][k], b[k][j]));
+                c[c_index] = add_q31(c[c_index], mul_q31(a[n*i + k], b[n*k + j]));
             }
         }
     }
@@ -39,27 +39,34 @@ uint32_t hash( uint32_t a) {
     return a;
 }
 
-void fill_matrix(int a[N][N], int n, int rand_offset) {
+void fill_matrix(int a[], int n, int rand_offset) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            a[i][j] = hash(i + n*j + rand_offset);
+            a[i*n+j] = hash(i + n*j + rand_offset);
         }
     }
 }
 
-void print_matrix(int a[N][N], int n) {
+// from https://stackoverflow.com/a/72694350/6454085
+#define Q31_SCALAR (float) 1.f
+#define F32_TO_Q31(F) (int32_t)((fmodf((F)+Q31_SCALAR,2.f*Q31_SCALAR) + ((F)<-Q31_SCALAR?Q31_SCALAR:-Q31_SCALAR)) * ((float)(INT32_MAX+1u)/Q31_SCALAR))
+#define Q31_TO_F32(Q) ((int32_t)(Q) / (float)(INT32_MAX+1u))
+
+void print_matrix(int a[], int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            printf("%d  ", a[i][j]);
+            printf("%d  ", a[i*n+j]);
         }
         printf("\n");
     }
 }
 
+#define N 100
+
 int main(void) {
-    int a[N][N];
-    int b[N][N];
-    int c[N][N];
+    int a[N*N];
+    int b[N*N];
+    int c[N*N];
 
     fill_matrix(a, N, 0);
     fill_matrix(b, N, N*N);

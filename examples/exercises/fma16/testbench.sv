@@ -1,12 +1,16 @@
+`include "tests.vh"
+
 /* verilator lint_off STMTDLY */
 module testbench_fma16;
+  string Tests[];
+
   logic        clk, reset;
   logic [15:0] x, y, z, rexpected, result;
   logic [7:0]  ctrl;
   logic        mul, add, negp, negz;
   logic [1:0]  roundmode;
   logic [31:0] vectornum, errors;
-  logic [75:0] testvectors[10000:0];
+  logic [75:0] testvectors[1000000:0];
   logic [3:0]  flags, flagsexpected; // Invalid, Overflow, Underflow, Inexact
 
   // instantiate device under test
@@ -21,7 +25,20 @@ module testbench_fma16;
   // at start of test, load vectors and pulse reset
   initial
     begin
-      $readmemh("tests/fmul_0.tv", testvectors);
+      if (TEST_MUL)
+        begin
+          Tests = {Tests, mul_tests};
+          $display("mul");
+        end
+      if (TEST_ADD)
+        Tests = {Tests, add_tests};
+      if (TEST_FMA)
+        Tests = {Tests, fma_tests};
+      if (TEST_SPECIAL)
+        Tests = {Tests, special_tests};
+
+      for (int i = 0; i < $size(Tests); i++)
+          $readmemh($sformatf("work/%s", Tests[i]), testvectors);
       vectornum = 0; errors = 0;
       reset = 1; #22; reset = 0;
     end

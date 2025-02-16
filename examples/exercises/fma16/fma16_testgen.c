@@ -1,11 +1,13 @@
 // fma16_testgen.c
-// David_Harris 8 February 2025
+// Created by: David_Harris 8 February 2025
+// Modified by: Kavi Dey 16 Februrary 2025
 // Generate tests for 16-bit FMA
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "softfloat.h"
 #include "softfloat_types.h"
 
@@ -26,6 +28,15 @@ uint16_t smlFracts[] = {0x0, 0xE1, 0x28D, 0x11E, 0x140, 0x221, 0x8000};
 
 uint16_t specialExponents[] = {0, 31, 15, 20, 7, 1, 0x8000};
 uint16_t specialFracts[] = {0x0, 0x200, 0x140, 0x4D, 0x8000};
+
+float16_t custom_x[] = {0x5200, 0x5200, 0x4248, 0x7E01, 0x7C01};
+float16_t custom_y[] = {0x3500, 0x3500, 0x3C00, 0x3C00, 0x3C00};
+float16_t custom_z[] = {0xCA80, 0x4F00, 0xC247, 0x3C00, 0x3C00};
+
+#define NUM_RAND_TESTS 100000
+float16_t random_x[NUM_RAND_TESTS];
+float16_t random_y[NUM_RAND_TESTS];
+float16_t random_z[NUM_RAND_TESTS];
 
 void softfloatInit(void) {
     softfloat_roundingMode = softfloat_round_minMag; 
@@ -86,7 +97,7 @@ void genCase(FILE *fptr, float16_t x, float16_t y, float16_t z, int mul, int add
     float16_t resultmag = result;
     resultmag.v &= 0x7FFF; // take absolute value
     if (f16_lt(resultmag, smallest) && (resultmag.v != 0x0000)) fprintf (fptr, "// skip denorm: ");
-    if ((softfloat_exceptionFlags) >> 1 % 2) fprintf(fptr, "// skip underflow: ");
+    // if ((softfloat_exceptionFlags) >> 1 % 2) fprintf(fptr, "// skip underflow: ");
 
     // skip special cases if requested
     if (resultmag.v == 0x0000 && !zeroAllowed) fprintf(fptr, "// skip zero: ");
@@ -201,6 +212,25 @@ void genMulAddTests(uint16_t *e, uint16_t *f, int sgn, char *testName, char *des
     fclose(fptr);
 }
 
+void genCustomTests(float16_t *x, float16_t *y, float16_t *z, int numCases, char *testName, char *desc, int roundingMode) {
+    float16_t cases[100000];
+    FILE *fptr;
+    char fn[80];
+ 
+    sprintf(fn, "work/%s.tv", testName);
+    if ((fptr = fopen(fn, "w")) == 0) {
+        printf("Error opening to write file %s.  Does directory exist?\n", fn);
+        exit(1);
+    }
+    fprintf(fptr, "%s", desc); fprintf(fptr, "\n");
+
+    int i;
+    for (i = 0; i < numCases; i++) { 
+        genCase(fptr, x[i], y[i], z[i], 1, 1, 0, 0, roundingMode, 1, 1, 1);
+    }
+    fclose(fptr);
+}
+
 int main()
 {
     if (system("mkdir -p work") != 0) exit(1); // create work directory if it doesn't exist
@@ -239,6 +269,22 @@ int main()
     genMulAddTests(specialExponents, specialFracts, 1, "fma_special_rp", "// Multiply-Add with zero, NaN, and infinity, RP", 0b10, 1, 1, 1);
     softfloat_roundingMode = softfloat_round_min;
     genMulAddTests(specialExponents, specialFracts, 1, "fma_special_rn", "// Multiply-Add with zero, NaN, and infinity, RN", 0b11, 1, 1, 1);
-  
+
+    // Test cases: custom special tests
+    softfloat_roundingMode = softfloat_round_minMag;
+    genCustomTests(custom_x, custom_y, custom_z, sizeof(custom_x)/sizeof(custom_x[0]), "custom_0", "// Manually specified test cases", 0b00);
+
+    // Test cases: random tests
+    srand(time(NULL));
+    int i, r;
+    for (i = 0; i < NUM_RAND_TESTS; i++) {
+        r = rand();
+        memcpy(&random_x[i], (int16_t*) &r, 2);
+        memcpy(&random_y[i], ((int16_t*) &r) + 1, 2);
+        r = rand();
+        memcpy(&random_z[i], (int16_t*) &r, 2);
+    }
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_0", "// Randomy generated test cases", 0b00);
+
     return 0;
 }

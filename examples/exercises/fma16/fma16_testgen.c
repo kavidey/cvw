@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "softfloat.h"
 #include "softfloat_types.h"
 
@@ -23,11 +24,8 @@ uint16_t easyFracts[] = {0, 0x200, 0x8000}; // 1.0 and 1.1
 uint16_t medExponents[] = {15, 28, 1, 17, 24, 8, 20, 30, 6, 10, 0x8000};
 uint16_t medFracts[] = {0x0, 0xE1, 0x28D, 0x100, 0x3D0, 0x11E, 0x140, 0x3FF, 0x221, 0x15C, 0x160, 0x8000};
 
-uint16_t smlExponents[] = {15, 28, 1, 8, 30, 0x8000};
-uint16_t smlFracts[] = {0x0, 0xE1, 0x28D, 0x11E, 0x140, 0x221, 0x8000};
-
-uint16_t specialExponents[] = {0, 31, 15, 20, 7, 1, 0x8000};
-uint16_t specialFracts[] = {0x0, 0x200, 0x140, 0x4D, 0x8000};
+uint16_t smlExponents[] = {0, 31, 15, 28, 1, 8, 0x8000};
+uint16_t smlFracts[] = {0x0, 0x140, 0x221, 0x4D, 0x8000};
 
 float16_t custom_x[] = {0x5200, 0x5200, 0x4248, 0x7E01, 0x7C01};
 float16_t custom_y[] = {0x3500, 0x3500, 0x3C00, 0x3C00, 0x3C00};
@@ -260,15 +258,15 @@ int main()
     // Medium Negative
     genMulAddTests(smlExponents, smlFracts, 1, "fma_2", "// Multiply-Add same as fma_1 but positive and negative, RZ", 0, 0, 0, 0);
 
-    // Test cases: special multiply-addition
+    // Test cases: multiply-addition with all edge cases
     softfloat_roundingMode = softfloat_round_minMag;
-    genMulAddTests(specialExponents, specialFracts, 1, "fma_special_rz", "// Multiply-Add with zero, NaN, and infinity, RZ", 0b00, 1, 1, 1);
+    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rz", "// Multiply-Add with zero, NaN, and infinity, RZ", 0b00, 1, 1, 1);
     softfloat_roundingMode = softfloat_round_near_even;
-    genMulAddTests(specialExponents, specialFracts, 1, "fma_special_rne", "// Multiply-Add with zero, NaN, and infinity, RNE", 0b01, 1, 1, 1);
+    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rne", "// Multiply-Add with zero, NaN, and infinity, RNE", 0b01, 1, 1, 1);
     softfloat_roundingMode = softfloat_round_max;
-    genMulAddTests(specialExponents, specialFracts, 1, "fma_special_rp", "// Multiply-Add with zero, NaN, and infinity, RP", 0b10, 1, 1, 1);
+    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rp", "// Multiply-Add with zero, NaN, and infinity, RP", 0b10, 1, 1, 1);
     softfloat_roundingMode = softfloat_round_min;
-    genMulAddTests(specialExponents, specialFracts, 1, "fma_special_rn", "// Multiply-Add with zero, NaN, and infinity, RN", 0b11, 1, 1, 1);
+    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rn", "// Multiply-Add with zero, NaN, and infinity, RN", 0b11, 1, 1, 1);
 
     // Test cases: custom special tests
     softfloat_roundingMode = softfloat_round_minMag;

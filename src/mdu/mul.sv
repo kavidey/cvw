@@ -59,23 +59,26 @@ module mul #(parameter XLEN) (
   // Calculate partial products
   assign PP1E = {2'b0, PPrime};
 
+  assign MULH = Funct3E == 3'b001;
+  assign MULHSU = Funct3E == 3'b010;
+
+  // P2 = ~PA for mulh and PA for everything else
+  assign PP2E = {2'b0, MULH ? ~PA : PA, {(XLEN-1){1'b0}}};
+  
+  // P3 = ~PB for mulh or mulhsu and PB for everythign else
+  assign PP3E = {2'b0, (MULH | MULHSU) ? ~PB : PB, {(XLEN-1){1'b0}}};
+
   always_comb begin
     case (Funct3E)
       3'b001: begin // mulh - signed signed
-        PP2E = {2'b0, ~PA, {(XLEN-1){1'b0}}};     // P2 = ~PA
-        PP3E = {2'b0, ~PB, {(XLEN-1){1'b0}}};     // P3 = ~PB
         // P4 = Pm << 2N-2 + 1 << 2N-1 + 1 << N
         PP4E = {1'b1, Pm, {(XLEN-3){1'b0}}, 1'b1, {XLEN{1'b0}}};
       end
       3'b010: begin // mulhsu - signed unsigned
-        PP2E = {2'b0, PA, {(XLEN-1){1'b0}}};     // P2 = ~PA
-        PP3E = {2'b0, ~PB, {(XLEN-1){1'b0}}};      // P3 = PB
         // ~(Pm << 2N-1) + 1 + 1 << N-1
         PP4E = {1'b1, ~Pm, {(XLEN-2){1'b0}}, 1'b1, {(XLEN-1){1'b0}}};
       end
       default: begin // mul
-        PP2E = {2'b0, PA, {(XLEN-1){1'b0}}};     // P2 = PA
-        PP3E = {2'b0, PB, {(XLEN-1){1'b0}}};     // P3 = PB
         PP4E = {1'b0, Pm, {(XLEN*2-2){1'b0}}};   // P4 = Pm << 2N-2
       end
     endcase

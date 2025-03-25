@@ -10,7 +10,8 @@
 module fmamult(
     input  logic [15:0] x,
     input  logic [15:0] y,
-    output logic [15:0] a
+    output logic [15:0] a,
+    output logic        MInvalid, MOverflow, MUnderflow, MInexact
 );
     logic x_sign, y_sign, a_sign;
     logic [4:0] x_exp, y_exp, a_exp;
@@ -31,8 +32,12 @@ module fmamult(
     logic mul_overflow;
     assign mul_overflow = mul_result[21];
 
+    logic [20:0] mul_shifted;
+    // assign mul_shifted = mul_overflow ? mul_result[20:11] : mul_result[19:10];
+    assign mul_shifted = mul_overflow ? mul_result : {mul_result[19:0], 1'b0};
+
     // assign a_fract to the correct set of bits from mul_result based on overflow
-    assign a_fract = mul_overflow ? mul_result[20:11] : mul_result[19:10];
+    assign a_fract = mul_shifted[20:11];
 
     // assign a_exp including mul_overflow and bias compensation
     logic [5:0] add_result;
@@ -40,4 +45,10 @@ module fmamult(
     assign a_exp = add_result[4:0];
 
     assign a = {a_sign, a_exp, a_fract};
+
+    // flags
+    assign MInvalid = 0;
+    assign MOverflow = 0;
+    assign MUnderflow = 0;
+    assign MInexact = |mul_shifted[10:0];
 endmodule

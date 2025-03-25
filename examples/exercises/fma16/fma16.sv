@@ -21,9 +21,10 @@ module fma16 (
 );
     logic [15:0] a;
 
-    fmamult fmamult(.x, .y, .a);
+    logic MInvalid, MOverflow, MUnderflow, MInexact;
+    fmamult fmamult(.x, .y, .a, .MInvalid, .MOverflow, .MUnderflow, .MInexact);
 
     fmaadd fmaadd(.a, .z, .w(result));
 
-    assign flags = 4'b0;
+    assign flags = {MInvalid, MOverflow, MUnderflow, MInexact};
 endmodule

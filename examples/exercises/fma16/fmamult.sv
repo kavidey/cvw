@@ -17,8 +17,11 @@ module fmamult(
     logic [4:0] x_exp, y_exp, a_exp;
     logic [9:0] x_fract, y_fract, a_fract;
 
-    assign {x_sign, x_exp, x_fract} = x;
-    assign {y_sign, y_exp, y_fract} = y;
+    logic x_zero, x_inf, x_nan, x_snan;
+    unpackfloat unpackX(.f(x), .sign(x_sign), .exp(x_exp), .fract(x_fract), .zero(x_zero), .inf(x_inf), .nan(x_nan), .snan(x_snan));
+
+    logic y_zero, y_inf, y_nan, y_snan;
+    unpackfloat unpackY(.f(y), .sign(y_sign), .exp(y_exp), .fract(y_fract), .zero(y_zero), .inf(y_inf), .nan(y_nan), .snan(y_snan));
 
     // calculate sign bit
     assign a_sign = x_sign ^ y_sign;
@@ -33,8 +36,7 @@ module fmamult(
     assign mul_overflow = mul_result[21];
 
     logic [20:0] mul_shifted;
-    // assign mul_shifted = mul_overflow ? mul_result[20:11] : mul_result[19:10];
-    assign mul_shifted = mul_overflow ? mul_result : {mul_result[19:0], 1'b0};
+    assign mul_shifted = mul_overflow ? mul_result[20:0] : {mul_result[19:0], 1'b0};
 
     // assign a_fract to the correct set of bits from mul_result based on overflow
     assign a_fract = mul_shifted[20:11];
@@ -47,8 +49,8 @@ module fmamult(
     assign a = {a_sign, a_exp, a_fract};
 
     // flags
-    assign MInvalid = 0;
-    assign MOverflow = 0;
+    assign MInvalid = (x_snan | y_snan) | (x_zero & y_inf) | (x_inf & y_zero);
+    assign MOverflow = add_result[5];
     assign MUnderflow = 0;
-    assign MInexact = |mul_shifted[10:0];
+    assign MInexact = |mul_shifted[10:0] | MOverflow;
 endmodule

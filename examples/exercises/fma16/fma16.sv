@@ -90,7 +90,7 @@ module fma16 (
     logic [4*`NF+5:0] m_shifted;
     logic [`NF-1:0] m_fract;
     assign m_shifted = {{`NF+3{1'b0}}, s_fract} << (`NF + 3 + $signed(m_cnt));
-    assign m_fract = m_shifted[2*`NF:`NF+1];
+    assign m_fract = m_shifted[3*`NF+2:2*`NF+3];
 
     logic [`NE:0] m_exp;
     assign m_exp = p_exp[`NE-1:0] - m_cnt;

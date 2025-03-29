@@ -1,5 +1,5 @@
-localparam TEST_MUL = 1;
-localparam TEST_ADD = 0;
+localparam TEST_MUL = 0;
+localparam TEST_ADD = 1;
 localparam TEST_FMA = 0;
 localparam TEST_SPECIAL = 0;
 

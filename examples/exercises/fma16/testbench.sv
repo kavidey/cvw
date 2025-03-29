@@ -25,6 +25,8 @@ module testbench_fma16;
   // at start of test, load vectors and pulse reset
   initial
     begin
+      $dumpfile("fma16.vcd");
+      $dumpvars(0, testbench_fma16);
       if (TEST_MUL)
         begin
           Tests = {Tests, mul_tests};

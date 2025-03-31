@@ -10,7 +10,7 @@
 `include "fma.vh"
 
 module unpackfloat(
-    input  logic [`WIDTH-1:0] f,
+    input  logic [`FLEN-1:0] f,
     output logic              sign,
     output logic [`NE-1:0]    exp,
     output logic [`NF-1:0]    fract,

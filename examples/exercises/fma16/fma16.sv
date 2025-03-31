@@ -10,15 +10,15 @@
 `include "fma.vh"
 
 module fma16 (
-    input  logic [`WIDTH-1:0] x,
-    input  logic [`WIDTH-1:0] y,
-    input  logic [`WIDTH-1:0] z,
+    input  logic [`FLEN-1:0] x,
+    input  logic [`FLEN-1:0] y,
+    input  logic [`FLEN-1:0] z,
     input  logic              mul,
     input  logic              add,
     input  logic              negp,
     input  logic              negz,
     input  logic        [1:0] roundmode,
-    output logic [`WIDTH-1:0] result,
+    output logic [`FLEN-1:0] result,
     output logic        [3:0] flags
 );
     logic x_sign, y_sign, z_sign, p_sign;
@@ -47,15 +47,25 @@ module fma16 (
     assign p_exp = x_exp + y_exp - `BIAS;
 
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
-    logic [`NE:0] a_cnt;
-    assign a_cnt = p_exp - z_exp + `NF + 2;
+    logic signed [`NE+1:0] a_cnt;
+    assign a_cnt = {1'b0, p_exp} - {1'b0, z_exp} + `NF + 2;
+    logic kill_z, kill_prod;
+    assign kill_z = a_cnt > (3*`NF + 3);
+    assign kill_prod = (a_cnt < 0) | x_zero | y_zero;
 
     ///// 4. Shift the significand of Z into alignment: A_m = Z_m >> A_cnt /////
     logic [`NF+2:0] z_preshift;
     assign z_preshift = {1'b1, z_fract, 2'b00};
 
     logic [4*`NF+3:0] z_shifted;
-    assign z_shifted = {z_preshift, {(3*`NF+1){1'b0}}} >> a_cnt;
+    always_comb begin
+        if (kill_prod)
+            z_shifted = {{`NF+2{1'b0}}, 1'b1, z_fract, {2*`NF+1{1'b0}}};
+        else if (kill_z)
+            z_shifted = 0;
+        else
+            z_shifted = {z_preshift, {(3*`NF+1){1'b0}}} >> a_cnt;
+    end
 
     logic [3*`NF+2:0] a_fract;
     assign a_fract = z_shifted[4*`NF+3:`NF+1];
@@ -66,7 +76,7 @@ module fma16 (
     assign diff_sign = a_sign ^ p_sign;
 
     logic [3*`NF+2:0] aligned_p_fract;
-    assign aligned_p_fract = {{`NF+1{1'b0}}, p_fract};
+    assign aligned_p_fract = ~kill_prod ? {{`NF+1{1'b0}}, p_fract} : 0;
 
     logic [3*`NF+3:0] pre_sum, neg_pre_sum;
     assign pre_sum = a_fract + (diff_sign ? ~{1'b0, aligned_p_fract} + 1'b1: {1'b0, aligned_p_fract});
@@ -84,16 +94,16 @@ module fma16 (
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
     logic [$clog2(3*`NF+3)-1:0] lzero, m_cnt;
     priorityencoder #(.N(3*`NF+3)) priorityencoder(.A(s_fract), .Y(lzero));
-    assign m_cnt = 20 - lzero;
+    assign m_cnt = (2*`NF) - lzero;
 
     ///// 7. Shift the result to renormalized: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
-    logic [4*`NF+5:0] m_shifted;
+    logic [4*`NF+4:0] m_shifted;
     logic [`NF-1:0] m_fract;
-    assign m_shifted = {{`NF+3{1'b0}}, s_fract} << (`NF + 3 + $signed(m_cnt));
-    assign m_fract = m_shifted[3*`NF+2:2*`NF+3];
+    assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
+    assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
 
     logic [`NE:0] m_exp;
-    assign m_exp = p_exp[`NE-1:0] - m_cnt;
+    assign m_exp = kill_prod ? (z_exp - m_cnt) : (p_exp[`NE-1:0] - m_cnt);
         
     assign result = {s_sign, m_exp[`NE-1:0], m_fract};
 
@@ -104,6 +114,7 @@ module fma16 (
     assign MOverflow = 0;
     assign MUnderflow = 0;
     // assign MInexact = |mul_shifted[`NF:0] | MOverflow;
+    // assign MInexact = (|z_shifted[`NF+1:0]) | (|m_shifted[2*`NF+2:0]);
     assign MInexact = 0;
 
     assign flags = {MInvalid, MOverflow, MUnderflow, MInexact};

@@ -26,10 +26,7 @@ module testbench_fma16;
   initial
     begin
       if (TEST_MUL)
-        begin
           Tests = {Tests, mul_tests};
-          $display("mul");
-        end
       if (TEST_ADD)
         Tests = {Tests, add_tests};
       if (TEST_FMA)

@@ -20,7 +20,7 @@ module unpackfloat(
 
     logic exp_nonzero, fract_zero, max_exponent;
     assign exp_nonzero = |exp;
-    assign fract_zero = &fract;
+    assign fract_zero = fract == 0;
     assign max_exponent = &exp; // exp == 5'b11111;
 
     assign zero = (~exp_nonzero) & fract_zero;

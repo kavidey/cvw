@@ -11,6 +11,7 @@ module testbench_fma16;
   logic [1:0]  roundmode;
   logic [31:0] vectornum, errors;
   logic [75:0] testvectors[1000000:0];
+  integer offset;
   logic [3:0]  flags, flagsexpected; // Invalid, Overflow, Underflow, Inexact
 
   // instantiate device under test
@@ -39,8 +40,16 @@ module testbench_fma16;
         $dumpvars(0, testbench_fma16);
       end
 
-      for (int i = 0; i < $size(Tests); i++)
-          $readmemh($sformatf("work/%s", Tests[i]), testvectors);
+      for (int i = 0; i < $size(Tests); i++) begin
+          offset = 0;
+          for (int j = 0; j < $size(testvectors); j++) begin
+            if (testvectors[offset] === 'x)
+              break;
+            else
+              offset = offset + 1;
+          end
+          $readmemh($sformatf("work/%s", Tests[i]), testvectors, offset);
+      end
       vectornum = 0; errors = 0;
       reset = 1; #22; reset = 0;
     end

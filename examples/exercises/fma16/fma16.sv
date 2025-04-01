@@ -50,12 +50,12 @@ module fma16 (
     logic signed [`NE+1:0] a_cnt;
     assign a_cnt = {1'b0, p_exp} - {1'b0, z_exp} + `NF + 2;
     logic kill_z, kill_prod;
-    assign kill_z = a_cnt > (3*`NF + 3);
+    assign kill_z = (a_cnt > (3*`NF + 3)) | z_zero;
     assign kill_prod = (a_cnt < 0) | x_zero | y_zero;
 
     ///// 4. Shift the significand of Z into alignment: A_m = Z_m >> A_cnt /////
     logic [`NF+2:0] z_preshift;
-    assign z_preshift = {1'b1, z_fract, 2'b00};
+    assign z_preshift = {1'b1, z_fract, 2'b00}; // preshift left by NF+2
 
     logic [4*`NF+3:0] z_shifted;
     always_comb begin

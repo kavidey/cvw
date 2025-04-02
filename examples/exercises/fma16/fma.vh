@@ -1,4 +1,11 @@
-/// PRECISION ///
+///////////////////////////////////////////
+// fma.vh
+//
+// Written: Kavi Dey kdey@hmc.edu
+// Created: Feb 8, 2025
+//
+// Purpose: configuration for FMA unit
+///////////////////////////////////////////
 
 // HALF PRECISION
 `define FLEN 16

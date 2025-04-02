@@ -44,7 +44,7 @@ module fma16 (
 
     ///// 2. Add the exponents of X and Y: P_e = X_e + Y_e - bias /////
     logic [`NE:0] p_exp;
-    assign p_exp = x_exp + y_exp - `BIAS;
+    assign p_exp = (x_zero | y_zero) ? 0 : x_exp + y_exp - `BIAS;
 
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
     logic signed [`NE+1:0] a_cnt;
@@ -89,27 +89,25 @@ module fma16 (
     assign aligned_p_fract = ~kill_prod ? {{`NF+1{1'b0}}, p_fract} : 0;
 
     logic [3*`NF+3:0] pre_sum, neg_pre_sum;
-    // assign pre_sum = a_fract + (diff_sign ? ~{1'b0, aligned_p_fract} + 1'b1: {1'b0, aligned_p_fract});
-    // assign neg_pre_sum = aligned_p_fract + ~{1'b0, a_fract} + 1'b1;
-    assign pre_sum = a_fract + (diff_sign ? (~{1'b0, aligned_p_fract} + {{3*`NF+2{1'b0}}, (~a_sticky)|~kill_prod}): {1'b0, aligned_p_fract});
+    assign pre_sum = a_fract + (diff_sign ? (~{1'b0, aligned_p_fract} + {{3*`NF+2{1'b0}}, (~a_sticky)|~kill_prod}) : {1'b0, aligned_p_fract});
     assign neg_pre_sum = aligned_p_fract + ~{1'b0, a_fract} + {{3*`NF+2{1'b0}}, (~a_sticky)|(kill_prod)};
 
     logic pos_sum;
     assign pos_sum = pre_sum[3*`NF+3]; // pos_sum is 0 if pre_sum > 0 and 1 if neg_pre_sum > 0
 
-    logic [3*`NF+2:0] s_fract;
-    assign s_fract = pos_sum ? neg_pre_sum[3*`NF+2:0] : pre_sum[3*`NF+2:0]; // pull out everything but the top bit of the correct sum
+    logic [3*`NF+3:0] s_fract;
+    assign s_fract = pos_sum ? neg_pre_sum[3*`NF+3:0] : pre_sum[3*`NF+3:0];
 
     logic s_sign;
     assign s_sign = diff_sign ? a_sign ^ pos_sum : a_sign;
 
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
-    logic [$clog2(3*`NF+3)-1:0] lzero, m_cnt;
-    priorityencoder #(.N(3*`NF+3)) priorityencoder(.A(s_fract), .Y(lzero));
+    logic [$clog2(3*`NF+4)-1:0] lzero, m_cnt;
+    priorityencoder #(.N(3*`NF+4)) priorityencoder(.A(s_fract), .Y(lzero));
     assign m_cnt = (2*`NF) - lzero;
 
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
-    logic [4*`NF+4:0] m_shifted;
+    logic [4*`NF+5:0] m_shifted;
     logic [`NF-1:0] m_fract;
     assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
     assign m_fract = m_shifted[3*`NF+1:2*`NF+2];

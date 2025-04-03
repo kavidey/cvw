@@ -44,11 +44,11 @@ module fma16 (
 
     ///// 2. Add the exponents of X and Y: P_e = X_e + Y_e - bias /////
     logic [`NE:0] p_exp;
-    assign p_exp = (x_zero | y_zero) ? 0 : x_exp + y_exp - `BIAS;
+    assign p_exp = (x_zero | y_zero) ? 0 : (x_exp + y_exp - `BIAS);
 
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
     logic signed [`NE+1:0] a_cnt;
-    assign a_cnt = {1'b0, p_exp} - {1'b0, z_exp} + `NF + 2;
+    assign a_cnt = {p_exp[`NE], p_exp} - {1'b0, z_exp} + `NF + 2;
     logic kill_z, kill_prod;
     assign kill_z = (a_cnt > (3*`NF + 3)) | z_zero;
     assign kill_prod = (a_cnt < 0) | x_zero | y_zero;

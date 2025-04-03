@@ -83,7 +83,7 @@ module fma16 (
     ///// 5. Add the aligned significands: S_m = P_m + A_m /////
     logic a_sign, diff_sign;
     assign a_sign = z_sign ^ negz;
-    assign diff_sign = a_sign ^ p_sign;
+    assign diff_sign = a_sign ^ p_sign; // 1 means they have different signs and we're doing effective subtraction
 
     logic [3*`NF+2:0] aligned_p_fract;
     assign aligned_p_fract = ~kill_prod ? {{`NF+1{1'b0}}, p_fract} : 0;
@@ -114,8 +114,6 @@ module fma16 (
 
     logic [`NE:0] m_exp;
     assign m_exp = kill_prod ? (z_exp - m_cnt) : (p_exp[`NE-1:0] - m_cnt);
-        
-    assign result = {s_sign, m_exp[`NE-1:0], m_fract};
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
     // logic [6:0] round_flags; // sign_overflow_L_G_sticky_roundmode
@@ -132,6 +130,23 @@ module fma16 (
     // end
 
     ///// 9. Handle flags and special cases: W = specialcase(R, X, Y, Z) /////
+    logic nan, snan, sub_inf, zero_mul_inf, one_or_more_inf;
+    assign nan = x_nan | y_nan | z_nan;
+    assign snan = x_snan | y_snan | z_snan;
+
+    assign sub_inf = (x_nan | y_nan) & diff_sign;
+    assign zero_mul_inf = (x_zero & y_inf) | (y_zero & x_inf);
+
+    always_comb begin
+        if (nan | sub_inf | zero_mul_inf)
+            result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}};
+        else if (x_inf | y_inf)
+            result = {p_sign, {`NE{1'b1}}, {`NF{1'b0}}};
+        else if (z_inf)
+            result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}};
+        else
+            result = {s_sign, m_exp[`NE-1:0], m_fract};
+    end
 
     logic invalid, overflow, underflow, inexact;
     assign invalid = (x_snan | y_snan) | (x_zero & y_inf) | (x_inf & y_zero);

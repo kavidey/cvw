@@ -34,6 +34,7 @@ module mul #(parameter XLEN) (
   input  logic [2:0]          Funct3E,                        // type of multiply
   output logic [XLEN*2-1:0]   ProdM                           // double-widthproduct
 );
+  logic MULH, MULHSU;
   logic Am, Bm, Pm;
   logic [XLEN-2:0]   APrime, BPrime, PA, PB;
   logic [XLEN*2-3:0] PPrime;

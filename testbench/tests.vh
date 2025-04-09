@@ -197,47 +197,16 @@ string arch32pmp[] = '{
 // Tests commented out pending riscv-arch-test issue #588
 string arch64pmp[] = '{
   `RISCVARCHTEST,
-  "rv64i_m/pmp64/src/pmp64-CFG-reg.S",
-  "rv64i_m/pmp64/src/pmp64-CSR-access.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-R-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-R-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-R.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RW-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RW-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RW.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RWX.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RX-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RX-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-RX.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-X-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-X-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NA4-X.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-R-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-R-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-R.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-RW-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-RW-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-RW.S",
-  // "rv64i_m/pmp64/src/pmp64-NAPOT-RWX.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-RX-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-RX-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-RX.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-X-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-X-priority.S",
-  "rv64i_m/pmp64/src/pmp64-NAPOT-X.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-R-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-R-priority.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-R.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-RW-priority-level-2..S",
-  "rv64i_m/pmp64/src/pmp64-TOR-RW-priority.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-RW.S",
-  // "rv64i_m/pmp64/src/pmp64-TOR-RWX.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-RX-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-RX-priority.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-RX.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-X-priority-level-2.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-X-priority.S",
-  "rv64i_m/pmp64/src/pmp64-TOR-X.S"
+  "rv64i_m/pmp/src/pmp64-CSR-ALL-MODES.S",
+  "rv64i_m/pmp/src/pmp64-NA4-M.S",
+  "rv64i_m/pmp/src/pmp64-NA4-S.S",
+  "rv64i_m/pmp/src/pmp64-NA4-U.S",
+  "rv64i_m/pmp/src/pmp64-NAPOT-M.S",
+  "rv64i_m/pmp/src/pmp64-NAPOT-S.S",
+  "rv64i_m/pmp/src/pmp64-NAPOT-U.S"
+  // "rv64i_m/pmp/src/pmp64-TOR-M.S", TODO: Reenable when Wally top of PMP region bug is fixed
+  // "rv64i_m/pmp/src/pmp64-TOR-S.S",
+  // "rv64i_m/pmp/src/pmp64-TOR-U.S"
 };
 
 string arch32vm_sv32[] = '{
@@ -253,6 +222,9 @@ string arch32vm_sv32[] = '{
   "rv32i_m/vm_sv32/src/vm_U_Bit_set_U_mode.S",
   "rv32i_m/vm_sv32/src/vm_U_Bit_unset_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_U_Bit_unset_U_mode.S",
+  "rv32i_m/vm_sv32/src/vm_VA_all_ones_S_mode.S",
+  "rv32i_m/vm_sv32/src/vm_global_pte_S_mode.S",
+  "rv32i_m/vm_sv32/src/vm_global_pte_U_mode.S",
   "rv32i_m/vm_sv32/src/vm_invalid_pte_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_invalid_pte_U_mode.S",
   "rv32i_m/vm_sv32/src/vm_misaligned_S_mode.S",
@@ -261,6 +233,9 @@ string arch32vm_sv32[] = '{
   "rv32i_m/vm_sv32/src/vm_mprv_U_mode.S",
   "rv32i_m/vm_sv32/src/vm_mprv_U_set_sum_set_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_mprv_U_set_sum_unset_S_mode.S",
+  "rv32i_m/vm_sv32/src/vm_mprv_bare_mode.S",
+  // "rv32i_m/vm_sv32/src/vm_mstatus_sbe_set_S_mode.S", TODO: Reenable when Sail big endian support is merged
+  // "rv32i_m/vm_sv32/src/vm_mstatus_sbe_set_sum_set_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_mxr_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_mxr_U_mode.S",
   "rv32i_m/vm_sv32/src/vm_nleaf_pte_level0_S_mode.S",
@@ -270,6 +245,7 @@ string arch32vm_sv32[] = '{
   "rv32i_m/vm_sv32/src/vm_reserved_rwx_pte_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_reserved_rwx_pte_U_mode.S",
   "rv32i_m/vm_sv32/src/vm_sum_set_S_mode.S",
+  "rv32i_m/vm_sv32/src/vm_sum_set_U_Bit_unset_S_mode.S",
   "rv32i_m/vm_sv32/src/vm_sum_unset_S_mode.S"
 };
 
@@ -2688,13 +2664,21 @@ string arch64zfad[] = '{
   "rv64i_m/D_Zfa/src/fcvtmod.w.d_b29-01.S",
   "rv64i_m/D_Zfa/src/fleq_b1-01.S",
   "rv64i_m/D_Zfa/src/fleq_b19-01.S",
+  "rv64i_m/D_Zfa/src/fleq.d_b1-01.S",
+  "rv64i_m/D_Zfa/src/fleq.d_b19-01.S",
   "rv64i_m/D_Zfa/src/fli.d-01.S",
   "rv64i_m/D_Zfa/src/fltq_b1-01.S",
   "rv64i_m/D_Zfa/src/fltq_b19-01.S",
+  "rv64i_m/D_Zfa/src/fltq.d_b1-01.S",
+  "rv64i_m/D_Zfa/src/fltq.d_b19-01.S",
   "rv64i_m/D_Zfa/src/fminm_b1-01.S",
   "rv64i_m/D_Zfa/src/fminm_b19-01.S",
+  "rv64i_m/D_Zfa/src/fminm.d_b1-01.S",
+  "rv64i_m/D_Zfa/src/fminm.d_b19-01.S",
   "rv64i_m/D_Zfa/src/fmaxm_b1-01.S",
-  "rv64i_m/D_Zfa/src/fmaxm_b19-01.S"
+  "rv64i_m/D_Zfa/src/fmaxm_b19-01.S",
+  "rv64i_m/D_Zfa/src/fmaxm.d_b1-01.S",
+  "rv64i_m/D_Zfa/src/fmaxm.d_b19-01.S"
 };
 
 string arch32d_fma[] = '{

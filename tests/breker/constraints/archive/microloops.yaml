@@ -21,7 +21,7 @@ trek:
     # pss_top.rvMmu.rvMmuOp.RvMmuOp::nonLeafPteVClrErr: 0
 
     # turn of SoC level Dekker and Atomics tests
-    # pss_top.soc: 0
+    pss_top.soc: 0
 
 
     # turn off RV64 opcode tests
@@ -38,13 +38,13 @@ trek:
     pss_top.workload.entry: 0
 
     # turn of various coherency cache state tests
-    # pss_top.readOnly.entry: 0
-    # pss_top.writeOnly.entry: 0
-    # pss_top.writeRead.entry: 0
-    # pss_top.readWrite.entry: 0
-    # pss_top.moesiStates.entry: 0
-    # pss_top.tilelinkStates.entry: 0
+    pss_top.readOnly.entry: 0
+    pss_top.writeOnly.entry: 0
+    pss_top.writeRead.entry: 0
+    pss_top.readWrite.entry: 0
+    pss_top.moesiStates.entry: 0
+    pss_top.tilelinkStates.entry: 0
 
     # turn of coherency micro loop feature
     # these scenarios take a while to run
-    pss_top.microLoops.microLoopScn: 0
+    # pss_top.microLoops.microLoopScn: 0

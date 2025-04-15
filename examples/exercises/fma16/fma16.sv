@@ -95,15 +95,19 @@ module fma16 (
     logic pos_sum;
     assign pos_sum = pre_sum[3*`NF+3]; // pos_sum is 0 if pre_sum > 0 and 1 if neg_pre_sum > 0
 
+    logic s_fract_zero;
     logic [3*`NF+3:0] s_fract;
-    assign s_fract = pos_sum ? neg_pre_sum[3*`NF+3:0] : pre_sum[3*`NF+3:0];
+    assign s_fract = pos_sum ? neg_pre_sum : pre_sum;
+    assign s_fract_zero = (s_fract==0); // the sum cancelled perfectly to 0
 
-    logic s_sign;
+    logic s_sign, m_sign;
     assign s_sign = diff_sign ? a_sign ^ pos_sum : a_sign;
+    assign m_sign = s_fract_zero ? 0 : s_sign; // if the sum cancelled out to 0 then we need to set the sign to positive
 
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
-    logic [$clog2(3*`NF+4)-1:0] lzero, m_cnt;
+    logic [$clog2(3*`NF+4)-1:0] lzero, lzero2, m_cnt;
     priorityencoder #(.N(3*`NF+4)) priorityencoder(.A(s_fract), .Y(lzero));
+    // assign lzero2 = ((s_fract==0) ? (2*`NF) : lzero);
     assign m_cnt = (2*`NF) - lzero;
 
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
@@ -113,11 +117,16 @@ module fma16 (
     assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
 
     logic [`NE:0] m_exp;
-    assign m_exp = kill_prod ? (z_exp - m_cnt) : (p_exp[`NE-1:0] - m_cnt);
+    always_comb begin
+        if (s_fract_zero)
+            m_exp = 0;
+        else 
+            m_exp = kill_prod ? (z_exp - m_cnt) : (p_exp[`NE-1:0] - m_cnt);
+    end
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
     // logic [6:0] round_flags; // sign_overflow_L_G_sticky_roundmode
-    // assign round_flags = {s_sign, 0, m_fract[0], m_shifted[2*`NF+1], |m_shifted[2*`NF:0], roundmode}
+    // assign round_flags = {m_sign, 0, m_fract[0], m_shifted[2*`NF+1], |m_shifted[2*`NF:0], roundmode}
     // logic [2:0] round_op;
     // // 0: TRUNC, 1: RND, 2: +inf, 3: -inf, 4: +MAXNUM, 5: -MAXNUM
     // always_comb begin
@@ -130,7 +139,7 @@ module fma16 (
     // end
 
     ///// 9. Handle flags and special cases: W = specialcase(R, X, Y, Z) /////
-    logic nan, snan, sub_inf, zero_mul_inf, one_or_more_inf;
+    logic nan, snan, sub_inf, zero_mul_inf;
     assign nan = x_nan | y_nan | z_nan;
     assign snan = x_snan | y_snan | z_snan;
 
@@ -145,7 +154,7 @@ module fma16 (
         else if (z_inf)
             result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}};
         else
-            result = {s_sign, m_exp[`NE-1:0], m_fract};
+            result = {m_sign, m_exp[`NE-1:0], m_fract};
     end
 
     logic invalid, overflow, underflow, inexact;

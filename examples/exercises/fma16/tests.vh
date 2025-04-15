@@ -1,12 +1,12 @@
 localparam TEST_MUL = 1;
-localparam TEST_ADD = 0;
-localparam TEST_FMA = 0;
+localparam TEST_ADD = 1;
+localparam TEST_FMA = 1;
 localparam TEST_SPECIAL = 1;
 
 string mul_tests[] = {
-    "fmul_0.tv"
-    // "fmul_1.tv",
-    // "fmul_2.tv"
+    "fmul_0.tv",
+    "fmul_1.tv",
+    "fmul_2.tv"
 };
 
 string add_tests[] = {

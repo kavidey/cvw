@@ -35,11 +35,6 @@ module testbench_fma16;
       if (TEST_SPECIAL)
         Tests = {Tests, special_tests};
 
-      if ($size(Tests) < 100) begin
-        $dumpfile("fma16.vcd");
-        $dumpvars(0, testbench_fma16);
-      end
-
       for (int i = 0; i < $size(Tests); i++) begin
           offset = 0;
           for (int j = 0; j < $size(testvectors); j++) begin
@@ -52,6 +47,11 @@ module testbench_fma16;
       end
       vectornum = 0; errors = 0;
       reset = 1; #22; reset = 0;
+
+      if (offset < 100) begin
+        $dumpfile("fma16.vcd");
+        $dumpvars(0, testbench_fma16);
+      end
     end
 
   // apply test vectors on rising edge of clk

@@ -105,7 +105,8 @@ module fma16 (
     assign m_sign = s_fract_zero ? 0 : s_sign; // if the sum cancelled out to 0 then we need to set the sign to positive
 
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
-    logic [$clog2(3*`NF+4)-1:0] lzero, m_cnt;
+    localparam SHIFT_WIDTH = $clog2(3*`NF+4);
+    logic [SHIFT_WIDTH-1:0] lzero, m_cnt;
     priorityencoder #(.N(3*`NF+4)) priorityencoder(.A(s_fract), .Y(lzero));
     assign m_cnt = (2*`NF) - lzero;
 
@@ -120,7 +121,7 @@ module fma16 (
         if (s_fract_zero)
             m_exp = 0;
         else 
-            m_exp = kill_prod ? ({1'b0, z_exp} - {m_cnt[$clog2(3*`NF+4)-1], m_cnt}) : (p_exp - {m_cnt[$clog2(3*`NF+4)-1], m_cnt});
+            m_exp = kill_prod ? ({1'b0, z_exp} - {m_cnt[SHIFT_WIDTH-1], m_cnt}) : (p_exp - {m_cnt[SHIFT_WIDTH-1], m_cnt});
     end
 
     ///// 8. Round the result and handle special cases: R = round(M) /////

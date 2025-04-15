@@ -43,12 +43,12 @@ module fma16 (
     assign p_fract = ({1'b1, x_fract} * {1'b1, y_fract});
 
     ///// 2. Add the exponents of X and Y: P_e = X_e + Y_e - bias /////
-    logic [`NE:0] p_exp;
-    assign p_exp = (x_zero | y_zero) ? 0 : (x_exp + y_exp - `BIAS);
+    logic [`NE+1:0] p_exp;
+    assign p_exp = (x_zero | y_zero) ? 0 : ({1'b0, x_exp} + {1'b0, y_exp} - `BIAS);
 
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
     logic signed [`NE+1:0] a_cnt;
-    assign a_cnt = {p_exp[`NE], p_exp} - {1'b0, z_exp} + `NF + 2;
+    assign a_cnt = p_exp - {1'b0, z_exp} + `NF + 2;
     logic kill_z, kill_prod;
     assign kill_z = (a_cnt > (3*`NF + 3)) | z_zero;
     assign kill_prod = (a_cnt < 0) | x_zero | y_zero;
@@ -105,9 +105,8 @@ module fma16 (
     assign m_sign = s_fract_zero ? 0 : s_sign; // if the sum cancelled out to 0 then we need to set the sign to positive
 
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
-    logic [$clog2(3*`NF+4)-1:0] lzero, lzero2, m_cnt;
+    logic [$clog2(3*`NF+4)-1:0] lzero, m_cnt;
     priorityencoder #(.N(3*`NF+4)) priorityencoder(.A(s_fract), .Y(lzero));
-    // assign lzero2 = ((s_fract==0) ? (2*`NF) : lzero);
     assign m_cnt = (2*`NF) - lzero;
 
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
@@ -116,12 +115,12 @@ module fma16 (
     assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
     assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
 
-    logic [`NE:0] m_exp;
+    logic [`NE+1:0] m_exp;
     always_comb begin
         if (s_fract_zero)
             m_exp = 0;
         else 
-            m_exp = kill_prod ? (z_exp - m_cnt) : (p_exp[`NE-1:0] - m_cnt);
+            m_exp = kill_prod ? ({1'b0, z_exp} - {m_cnt[$clog2(3*`NF+4)-1], m_cnt}) : (p_exp - {m_cnt[$clog2(3*`NF+4)-1], m_cnt});
     end
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
@@ -139,32 +138,38 @@ module fma16 (
     // end
 
     ///// 9. Handle flags and special cases: W = specialcase(R, X, Y, Z) /////
-    logic nan, snan, sub_inf, zero_mul_inf;
-    assign nan = x_nan | y_nan | z_nan;
-    assign snan = x_snan | y_snan | z_snan;
+    logic nan, snan, sub_inf, zero_mul_inf, p_inf;
+    assign nan = x_nan | y_nan | z_nan; // anything is nan
+    assign snan = x_snan | y_snan | z_snan; // anything is a signalling nan
+    assign p_inf = x_inf | y_inf; // product is infinitiy
 
-    assign sub_inf = (x_nan | y_nan) & diff_sign;
     assign zero_mul_inf = (x_zero & y_inf) | (y_zero & x_inf);
-
-    always_comb begin
-        if (nan | sub_inf | zero_mul_inf)
-            result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}};
-        else if (x_inf | y_inf)
-            result = {p_sign, {`NE{1'b1}}, {`NF{1'b0}}};
-        else if (z_inf)
-            result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}};
-        else
-            result = {m_sign, m_exp[`NE-1:0], m_fract};
-    end
 
     logic invalid, overflow, underflow, inexact;
     assign invalid = (x_snan | y_snan) | (x_zero & y_inf) | (x_inf & y_zero);
-    // assign MOverflow = add_result[`NE];
-    assign overflow = 0;
+    assign overflow = (m_exp > `EMAX);
     assign underflow = 0;
     // assign MInexact = |mul_shifted[`NF:0] | MOverflow;
     // assign MInexact = (|z_shifted[`NF+1:0]) | (|m_shifted[2*`NF+2:0]);
-    assign inexact = 0;
+    assign inexact = kill_z | kill_prod | overflow;
+
+    always_comb begin
+        if (nan | zero_mul_inf) // any inputs are nan OR (0 * inf)
+            result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
+        else if (p_inf & (~z_inf)) // x or y are inf but not z
+            result = {p_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of x*y
+        else if (~p_inf & z_inf) // z is inf but not x and y
+            result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
+        else if (p_inf & z_inf) // x y and z are inf
+            if (diff_sign)
+                result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
+            else
+                result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
+        else if (overflow)
+            result = {m_sign, {(`NE-1){1'b1}}, 1'b0, {`NF{1'b1}}}; // inf with sign of z
+        else
+            result = {m_sign, m_exp[`NE-1:0], m_fract};
+    end
 
     assign flags = {invalid, overflow, underflow, inexact};
 endmodule

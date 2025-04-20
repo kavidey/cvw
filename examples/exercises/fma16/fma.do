@@ -8,7 +8,7 @@ onbreak {resume}
 # create library
 vlib worklib
 
-vlog -lint -sv -work worklib fma16.sv unpackfloat.sv priorityencoder.sv testbench.sv
+vlog -lint -sv -work worklib fma16.sv fmamul.sv fmaadd.sv fmaround.sv fmapost.sv unpackfloat.sv priorityencoder.sv testbench.sv
 vopt +acc worklib.testbench_fma16 -work worklib -o testbenchopt
 vsim -lib worklib testbenchopt
 

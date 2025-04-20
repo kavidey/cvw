@@ -13,15 +13,15 @@ module fma16 (
     input  logic [`FLEN-1:0] x,
     input  logic [`FLEN-1:0] y,
     input  logic [`FLEN-1:0] z,
-    input  logic              mul,
-    input  logic              add,
-    input  logic              negp,
-    input  logic              negz,
-    input  logic        [1:0] roundmode,
+    input  logic             mul,
+    input  logic             add,
+    input  logic             negp,
+    input  logic             negz,
+    input  logic [1:0]       roundmode,
     output logic [`FLEN-1:0] result,
-    output logic        [3:0] flags
+    output logic [3:0]       flags
 );
-    logic x_sign, y_sign, z_sign, p_sign;
+    logic x_sign, y_sign, z_sign;
     logic [`NE-1:0] x_exp, y_exp, z_exp;
     logic [`NF-1:0] x_fract, y_fract, z_fract;
 
@@ -34,141 +34,74 @@ module fma16 (
     logic z_zero, z_inf, z_nan, z_snan;
     unpackfloat unpackZ(.f(z), .sign(z_sign), .exp(z_exp), .fract(z_fract), .zero(z_zero), .inf(z_inf), .nan(z_nan), .snan(z_snan));
 
-    // calculate sign bit
-    assign p_sign = x_sign ^ y_sign ^ negp;
 
     ///// 1. Multiply the significands of X and Y: P_m = X_m + Y_m /////
-    // 1.x_fract * 1.y_fract = AA.BBBBBBBBBBBBBBBBBBBB [2].[20] (half precision)
-    logic [2*`NF+1:0] p_fract;
-    assign p_fract = ({1'b1, x_fract} * {1'b1, y_fract});
-
     ///// 2. Add the exponents of X and Y: P_e = X_e + Y_e - bias /////
+    logic p_sign;
+    logic [2*`NF+1:0] p_fract;
     logic [`NE+1:0] p_exp;
-    assign p_exp = (x_zero | y_zero) ? 0 : ({1'b0, x_exp} + {1'b0, y_exp} - `BIAS);
+    fmamul fmamul(
+        // auxiliary inputs
+        .negp, .x_zero, .y_zero,
+        // multiplicand inputs
+        .x_sign, .x_exp, .x_fract,
+        .y_sign, .y_exp, .y_fract,
+        // product output
+        .p_sign, .p_fract, .p_exp
+    );
 
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
-    logic signed [`NE+1:0] a_cnt;
-    assign a_cnt = p_exp - {1'b0, z_exp} + `NF + 2;
-    logic kill_z, kill_prod;
-    assign kill_z = (a_cnt > (3*`NF + 3)) | z_zero;
-    assign kill_prod = (a_cnt < 0) | x_zero | y_zero;
-
     ///// 4. Shift the significand of Z into alignment: A_m = Z_m >> A_cnt /////
-    logic [`NF+2:0] z_preshift;
-    assign z_preshift = {1'b1, z_fract, 2'b00}; // preshift left by NF+2
-
-    logic [4*`NF+3:0] z_shifted;
-    always_comb begin
-        if (kill_prod)
-            z_shifted = {{`NF+2{1'b0}}, 1'b1, z_fract, {2*`NF+1{1'b0}}};
-        else if (kill_z)
-            z_shifted = 0;
-        else
-            z_shifted = {z_preshift, {(3*`NF+1){1'b0}}} >> a_cnt;
-    end
-
-    logic [3*`NF+2:0] a_fract;
-    assign a_fract = z_shifted[4*`NF+3:`NF+1];
-
-    logic a_sticky;
-    always_comb begin
-        if (kill_prod)
-            a_sticky = ~(x_zero | y_zero);
-        else if (kill_z)
-            a_sticky = ~z_zero;
-        else
-            a_sticky = |z_shifted[`NF-1:0];
-    end
-
     ///// 5. Add the aligned significands: S_m = P_m + A_m /////
-    logic a_sign, diff_sign;
-    assign a_sign = z_sign ^ negz;
-    assign diff_sign = a_sign ^ p_sign; // 1 means they have different signs and we're doing effective subtraction
-
-    logic [3*`NF+2:0] aligned_p_fract;
-    assign aligned_p_fract = ~kill_prod ? {{`NF+1{1'b0}}, p_fract} : 0;
-
-    logic [3*`NF+3:0] pre_sum, neg_pre_sum;
-    assign pre_sum = a_fract + (diff_sign ? (~{1'b0, aligned_p_fract} + {{3*`NF+2{1'b0}}, (~a_sticky)|~kill_prod}) : {1'b0, aligned_p_fract});
-    assign neg_pre_sum = aligned_p_fract + ~{1'b0, a_fract} + {{3*`NF+2{1'b0}}, (~a_sticky)|(kill_prod)};
-
-    logic pos_sum;
-    assign pos_sum = pre_sum[3*`NF+3]; // pos_sum is 0 if pre_sum > 0 and 1 if neg_pre_sum > 0
-
-    logic s_fract_zero;
-    logic [3*`NF+3:0] s_fract;
-    assign s_fract = pos_sum ? neg_pre_sum : pre_sum;
-    assign s_fract_zero = (s_fract==0); // the sum cancelled perfectly to 0
-
-    logic s_sign, m_sign;
-    assign s_sign = diff_sign ? a_sign ^ pos_sum : a_sign;
-    assign m_sign = s_fract_zero ? 0 : s_sign; // if the sum cancelled out to 0 then we need to set the sign to positive
-
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
-    localparam SHIFT_WIDTH = $clog2(3*`NF+4);
-    logic [SHIFT_WIDTH-1:0] lzero, m_cnt;
-    priorityencoder #(.N(3*`NF+4)) priorityencoder(.A(s_fract), .Y(lzero));
-    assign m_cnt = (2*`NF) - lzero;
-
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
-    logic [4*`NF+5:0] m_shifted;
+    logic m_sign;
     logic [`NF-1:0] m_fract;
-    assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
-    assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
-
     logic [`NE+1:0] m_exp;
-    always_comb begin
-        if (s_fract_zero)
-            m_exp = 0;
-        else 
-            m_exp = kill_prod ? ({1'b0, z_exp} - {m_cnt[SHIFT_WIDTH-1], m_cnt}) : (p_exp - {m_cnt[SHIFT_WIDTH-1], m_cnt});
-    end
+    logic [4*`NF+5:0] m_shifted;
+    logic kill_z, kill_prod, a_sign, diff_sign;
+    fmaadd fmaadd(
+        // auxiliary inputs
+        .negz, .x_zero, .y_zero, .z_zero,
+        // addend inputs
+        .z_sign, .z_exp, .z_fract,
+        .p_sign, .p_exp, .p_fract,
+        // sum output
+        .m_sign, .m_exp, .m_fract, .m_shifted,
+        // auxiliary outputs
+        .kill_z, .kill_prod, .a_sign, .diff_sign
+    );
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
-    // logic [6:0] round_flags; // sign_overflow_L_G_sticky_roundmode
-    // assign round_flags = {m_sign, 0, m_fract[0], m_shifted[2*`NF+1], |m_shifted[2*`NF:0], roundmode}
-    // logic [2:0] round_op;
-    // // 0: TRUNC, 1: RND, 2: +inf, 3: -inf, 4: +MAXNUM, 5: -MAXNUM
-    // always_comb begin
-    //     casez (round_flags)
-    //         7'b0_0_?_0_0_??: round_op = 0;
-    //         7'b0_0_?_0_1_??: round_op = 0;
-    //         7'b0_0_0_1_0_??: round_op = 0;
-    //         default: 
-    //     endcase
-    // end
+    logic r_sign;
+    logic [`NE-1:0] r_exp;
+    logic [`NF-1:0] r_fract;
+    fmaround fmaround (
+        .roundmode,
+        // sum input
+        .m_sign, .m_exp, .m_fract, .m_shifted,
+        // rounded output
+        .r_sign, .r_exp, .r_fract
+    );
 
     ///// 9. Handle flags and special cases: W = specialcase(R, X, Y, Z) /////
-    logic nan, snan, sub_inf, zero_mul_inf, p_inf;
-    assign nan = x_nan | y_nan | z_nan; // anything is nan
-    assign snan = x_snan | y_snan | z_snan; // anything is a signalling nan
-    assign p_inf = x_inf | y_inf; // product is infinitiy
-
-    assign zero_mul_inf = (x_zero & y_inf) | (y_zero & x_inf);
-
     logic invalid, overflow, underflow, inexact;
-    assign invalid = (x_snan | y_snan) | zero_mul_inf; // todo improve logic
-    assign overflow = (m_exp > `EMAX);
-    assign underflow = 0;
-    assign inexact = kill_z | kill_prod | overflow;
-
-    always_comb begin
-        if (nan | zero_mul_inf) // any inputs are nan OR (0 * inf)
-            result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
-        else if (p_inf & (~z_inf)) // x or y are inf but not z
-            result = {p_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of x*y
-        else if (~p_inf & z_inf) // z is inf but not x and y
-            result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
-        else if (p_inf & z_inf) // x y and z are inf
-            if (diff_sign)
-                result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
-            else
-                result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
-        else if (overflow)
-            result = {m_sign, {(`NE-1){1'b1}}, 1'b0, {`NF{1'b1}}}; // maxnum with sign of result
-        else
-            result = {m_sign, m_exp[`NE-1:0], m_fract};
-    end
+    fmapost fmapost(
+        // inputs
+        .x_zero, .y_zero, .z_zero,
+        .x_inf, .y_inf, .z_inf,
+        .x_nan, .y_nan, .z_nan,
+        .x_snan, .y_snan, .z_snan,
+        .x_sign, .y_sign, .z_sign,
+        .kill_z, .kill_prod,
+        .p_sign, .a_sign, .diff_sign, .m_sign, .r_sign,
+        .m_exp,
+        .r_exp,
+        .r_fract,
+        // outputs
+        .result,
+        .invalid, .overflow, .underflow, .inexact
+    );
 
     assign flags = {invalid, overflow, underflow, inexact};
 endmodule

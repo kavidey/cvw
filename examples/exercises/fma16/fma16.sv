@@ -147,11 +147,9 @@ module fma16 (
     assign zero_mul_inf = (x_zero & y_inf) | (y_zero & x_inf);
 
     logic invalid, overflow, underflow, inexact;
-    assign invalid = (x_snan | y_snan) | (x_zero & y_inf) | (x_inf & y_zero);
+    assign invalid = (x_snan | y_snan) | zero_mul_inf; // todo improve logic
     assign overflow = (m_exp > `EMAX);
     assign underflow = 0;
-    // assign MInexact = |mul_shifted[`NF:0] | MOverflow;
-    // assign MInexact = (|z_shifted[`NF+1:0]) | (|m_shifted[2*`NF+2:0]);
     assign inexact = kill_z | kill_prod | overflow;
 
     always_comb begin
@@ -167,7 +165,7 @@ module fma16 (
             else
                 result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
         else if (overflow)
-            result = {m_sign, {(`NE-1){1'b1}}, 1'b0, {`NF{1'b1}}}; // inf with sign of z
+            result = {m_sign, {(`NE-1){1'b1}}, 1'b0, {`NF{1'b1}}}; // maxnum with sign of result
         else
             result = {m_sign, m_exp[`NE-1:0], m_fract};
     end

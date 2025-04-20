@@ -187,7 +187,7 @@ module controller import cvw::*;  #(parameter cvw_t P) (
     assign INoShiftD        = ((Funct3D != 3'b001) & (Funct3D != 3'b101));
     assign IFunctD          = IShiftD | INoShiftD;
     assign RFunctD          = ((Funct3D == 3'b000 | Funct3D == 3'b101) & Funct7b5D) | FunctCZeroD | Funct7ZeroD;
-    assign MFunctD          = Funct7D == 7'b0000001 & (P.M_SUPPORTED | (P.ZMMUL_SUPPORTED & ~Funct3D[2])); // Is a multiply or division (if supported)
+    assign MFunctD          = (Funct7D == 7'b0000001) & (P.M_SUPPORTED | (P.ZMMUL_SUPPORTED & ~Funct3D[2])); // Is a multiply or division (if supported)
     assign LFunctD          = Funct3D == 3'b000 | Funct3D == 3'b001 | Funct3D == 3'b010 | Funct3D == 3'b100 | Funct3D == 3'b101 | 
                               ((P.XLEN == 64) & (Funct3D == 3'b011 | Funct3D == 3'b110));
     assign FLSFunctD        = (STATUS_FS != 2'b00) & ((Funct3D == 3'b010 & P.F_SUPPORTED) | (Funct3D == 3'b011 & P.D_SUPPORTED) |

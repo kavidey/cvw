@@ -43,7 +43,7 @@ module testbench_fma16;
             else
               offset = offset + 1;
           end
-          $readmemh($sformatf("work/%s", Tests[i]), testvectors, offset);
+          $readmemh($sformatf("work_harris/%s", Tests[i]), testvectors, offset);
       end
       vectornum = 0; errors = 0;
       reset = 1; #22; reset = 0;

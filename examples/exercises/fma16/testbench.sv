@@ -27,13 +27,15 @@ module testbench_fma16;
   initial
     begin
       if (TEST_MUL)
-          Tests = {Tests, mul_tests};
+        Tests = {Tests, mul_tests};
       if (TEST_ADD)
         Tests = {Tests, add_tests};
       if (TEST_FMA)
         Tests = {Tests, fma_tests};
       if (TEST_SPECIAL)
         Tests = {Tests, special_tests};
+      if (TEST_EXTRA)
+        Tests = {Tests, extra_tests};
 
       for (int i = 0; i < $size(Tests); i++) begin
           offset = 0;
@@ -43,7 +45,7 @@ module testbench_fma16;
             else
               offset = offset + 1;
           end
-          $readmemh($sformatf("work_harris/%s", Tests[i]), testvectors, offset);
+          $readmemh($sformatf("work/%s", Tests[i]), testvectors, offset);
       end
       vectornum = 0; errors = 0;
       reset = 1; #22; reset = 0;

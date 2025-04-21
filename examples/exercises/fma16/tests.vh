@@ -1,7 +1,8 @@
-localparam TEST_MUL = 1;
-localparam TEST_ADD = 1;
-localparam TEST_FMA = 1;
+localparam TEST_MUL = 0;
+localparam TEST_ADD = 0;
+localparam TEST_FMA = 0;
 localparam TEST_SPECIAL = 1;
+localparam TEST_EXTRA = 0;
 
 string mul_tests[] = {
     "fmul_0.tv",
@@ -22,8 +23,12 @@ string fma_tests[] = {
 };
 
 string special_tests[] = {
-    // "fma_special_rn.tv",
-    // "fma_special_rne.tv",
-    // "fma_special_rp.tv",
+    "fma_special_rn.tv",
+    "fma_special_rne.tv",
+    "fma_special_rp.tv",
     "fma_special_rz.tv"
+};
+
+string extra_tests[] = {
+    "../tests/baby_torture.tv"
 };

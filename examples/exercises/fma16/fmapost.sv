@@ -30,7 +30,7 @@ module fmapost (
 
     assign zero_mul_inf = (x_zero & y_inf) | (y_zero & x_inf);
 
-    assign invalid = (x_snan | y_snan) | zero_mul_inf; // todo improve logic
+    assign invalid = (x_snan | y_snan | z_snan) | zero_mul_inf; // todo improve logic
     assign overflow = (m_exp > `EMAX);
     assign underflow = 0;
     assign inexact = kill_z | kill_prod | overflow;

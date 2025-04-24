@@ -18,4 +18,4 @@
 // CALCULATED PARAMETERS
 `define NE (`FLEN - `NF - 1)
 `define BIAS (2**(`NE-1) - 1)
-`define EMAX (2**(`NE) - 1)
+`define EMAX (2**(`NE) - 2)

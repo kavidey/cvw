@@ -25,12 +25,14 @@ module fmapost (
     output logic [`FLEN-1:0] result,
     output logic             invalid, overflow, underflow, inexact
 );
-    logic nan, snan, zero_mul_inf, p_inf;
+    logic nan, snan, zero_mul_inf, sub_inf, p_inf;
     assign nan = x_nan | y_nan | z_nan; // anything is nan
     assign snan = x_snan | y_snan | z_snan; // anything is a signalling nan
     assign p_inf = x_inf | y_inf; // product is infinitiy
 
     assign zero_mul_inf = (x_zero & y_inf) | (y_zero & x_inf);
+    assign nan_mul_inf = (x_nan & y_inf) | (y_nan & x_inf);
+    assign sub_inf = (p_inf & z_inf & diff_sign);
 
     logic kill_flags;
     always_comb begin
@@ -46,11 +48,12 @@ module fmapost (
             result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
             kill_flags = 1;
         end
-        else if (p_inf & z_inf) begin // x y and z are inf
-            if (diff_sign)
-                result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
-            else
-                result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
+        else if (sub_inf) begin // effective subtraction of inf
+            result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
+            kill_flags = 1;
+        end
+        else if (p_inf & z_inf & (~diff_sign)) begin // effective addition of inf
+            result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
             kill_flags = 1;
         end
         else begin
@@ -59,7 +62,7 @@ module fmapost (
         end
     end
     
-    assign invalid = (x_snan | y_snan | z_snan) | zero_mul_inf; // todo improve logic
+    assign invalid = (x_snan | y_snan | z_snan) | zero_mul_inf | (sub_inf & (~(x_nan | y_nan))); // todo improve logic
     assign overflow = round_overflow & (~(invalid | kill_flags));
     assign underflow = 0;
     assign inexact = (a_sticky | overflow | (|round_flags[1:0])) & (~(invalid | kill_flags));

@@ -20,7 +20,7 @@ module fmaadd (
     output logic [`NF-1:0]   m_fract,
     output logic [`NE+1:0]   m_exp,
     output logic [4*`NF+5:0] m_shifted,
-    output logic             kill_z, kill_prod, a_sign, diff_sign
+    output logic             kill_z, kill_prod, a_sign, diff_sign, a_sticky
 );
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
     logic signed [`NE+1:0] a_cnt;
@@ -45,7 +45,6 @@ module fmaadd (
     logic [3*`NF+2:0] a_fract;
     assign a_fract = z_shifted[4*`NF+3:`NF+1];
 
-    logic a_sticky;
     always_comb begin
         if (kill_prod)
             a_sticky = ~(x_zero | y_zero);

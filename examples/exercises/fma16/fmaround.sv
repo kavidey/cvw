@@ -11,6 +11,8 @@
 
 module fmaround (
     input  logic [1:0]       roundmode,
+    input  logic             kill_prod, kill_z,
+    input  logic             diff_sign, a_sticky,
     input  logic             m_sign,
     input  logic [`NF-1:0]   m_fract,
     input  logic [`NE+1:0]   m_exp,
@@ -64,6 +66,10 @@ module fmaround (
             5'b?_0_?_1_1:
                 if (rne | rp)
                     round_op = 1;
+                    // if (a_sticky & diff_sign) // could also use (kill_prod | kill_z) instead of a_sticky
+                    //     round_op = 0;
+                    // else
+                    //     round_op = 1;
                 else
                     round_op = 0;
             5'b0_1_?_?_?:
@@ -80,44 +86,45 @@ module fmaround (
         endcase
     end
 
-    logic [`NF:0] m_fract_p1;
+    logic [`NF+1:0] m_fract_p1;
     logic [`NE+1:0] m_exp_p1;
-    assign m_fract_p1 = {1'b0, m_fract} + 1;
+    assign m_fract_p1 = {1'b0, 1'b1, m_fract} + 1; // add the leading 1 and an extra overflow bit
     assign m_exp_p1 = m_exp + 1;
 
-    // always_comb begin
-    //     case (round_op)
-    //         3'd0: begin // TRUNC
-    //             r_exp = m_exp[`NE-1:0];
-    //             r_fract = m_fract;
-    //         end
-    //         3'd1:
-    //             r_fract = m_fract_p1[`NF] ? m_fract_p1[`NF:1] : m_fract_p1[`NF-1:0];
-    //             r_exp = m_fract_p1[`NF] ? m_exp_p1[`NE-1:0] : m_exp[`NE-1:0];
-    //         3'd2: begin
-    //             r_exp = {`NE{1'b1}};
-    //             r_fract = {`NF{1'b0}};
-    //         end
-    //         3'd3: begin
-    //             r_exp = {`NE{1'b1}};
-    //             r_fract = {`NF{1'b0}};
-    //         end
-    //         3'd4: begin
-    //             r_exp = {{(`NE-1){1'b1}}, 1'b0};
-    //             r_fract = {`NF{1'b1}};
-    //         end
-    //         3'd5: begin
-    //             r_exp = {{(`NE-1){1'b1}}, 1'b0};
-    //             r_fract = {`NF{1'b1}};
-    //         end
-    //         default: begin
-    //             r_exp = m_exp[`NE-1:0];
-    //             r_fract = m_fract;
-    //         end
-    //     endcase
-    // end
+    always_comb begin
+        case (round_op)
+            3'd0: begin // TRUNC
+                r_exp = m_exp[`NE-1:0];
+                r_fract = m_fract;
+            end
+            3'd1: begin // RND
+                r_fract = m_fract_p1[`NF+1] ? m_fract_p1[`NF:1] : m_fract_p1[`NF-1:0];
+                r_exp = m_fract_p1[`NF+1] ? m_exp_p1[`NE-1:0] : m_exp[`NE-1:0];
+            end
+            3'd2: begin
+                r_exp = {`NE{1'b1}};
+                r_fract = {`NF{1'b0}};
+            end
+            3'd3: begin
+                r_exp = {`NE{1'b1}};
+                r_fract = {`NF{1'b0}};
+            end
+            3'd4: begin
+                r_exp = {{(`NE-1){1'b1}}, 1'b0};
+                r_fract = {`NF{1'b1}};
+            end
+            3'd5: begin
+                r_exp = {{(`NE-1){1'b1}}, 1'b0};
+                r_fract = {`NF{1'b1}};
+            end
+            default: begin
+                r_exp = m_exp[`NE-1:0];
+                r_fract = m_fract;
+            end
+        endcase
+    end
 
     assign r_sign = m_sign;
-    assign r_exp = m_exp[`NE-1:0];
-    assign r_fract = m_fract;
+    // assign r_exp = m_exp[`NE-1:0];
+    // assign r_fract = m_fract;
 endmodule

@@ -25,13 +25,11 @@ module fmaround (
 );
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
+    logic m_zero;
+    assign m_zero = ~((|m_fract) | (|m_exp));
+
     assign round_overflow = (m_exp > `EMAX);
 
-    // roundmode:
-    //      00: round to zero
-    //      01: round to even
-    //      10: round down (toward negative infinity)
-    //      11: round up (toward positive infinity)
     logic rne, rz, rp, rn;
     assign rz = roundmode == 2'b00; // round to zero
     assign rne = roundmode == 2'b01; // round to even
@@ -39,7 +37,7 @@ module fmaround (
     assign rn = roundmode == 2'b11; // round down (toward negative infinity)
 
     // sign_overflow_L_G_sticky
-    assign round_flags = {m_sign, round_overflow, m_fract[0], m_shifted[2*`NF+1], |m_shifted[2*`NF:0]};
+    assign round_flags = {m_sign, round_overflow, m_fract[0], m_shifted[2*`NF+1], (|m_shifted[2*`NF:0]) | a_sticky};
     // logic [2:0] round_op;
     enum {TRUNC, RND, P_INF, N_INF, P_MAXNUM, N_MAXNUM} round_op;
 
@@ -139,7 +137,6 @@ module fmaround (
         endcase
     end
 
-    assign r_sign = m_sign;
-    // assign r_exp = m_exp[`NE-1:0];
-    // assign r_fract = m_fract;
+    // r_sign = m_sign unless (result == 0.0 and rounding mode is rn) then r_sign = 1
+    assign r_sign = (m_zero & rn) ? 1 : m_sign;
 endmodule

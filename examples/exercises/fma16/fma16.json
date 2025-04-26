@@ -1,17 +1,24 @@
 {
   "extensionVersion": "1.3.3",
   "fileName": "/home/kdey/cvw/examples/exercises/fma16/fma16.vcd",
-  "markerTime": 75,
+  "markerTime": 66,
   "altMarkerTime": null,
   "selectedSignal": {
-    "name": "testbench_fma16.dut.fmaadd.s_sign",
+    "name": "testbench_fma16.dut.fmaround.round_overflow",
     "numberFormat": "binary",
     "msb": -1,
     "lsb": -1
   },
-  "zoomRatio": 23.423189868302508,
-  "scrollLeft": 1443,
+  "zoomRatio": 10.541356549944197,
+  "scrollLeft": 5816.297272056745,
   "displayedSignals": [
+    {
+      "netlistId": 66,
+      "name": "testbench_fma16.dut.mul",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
     {
       "netlistId": 67,
       "name": "testbench_fma16.dut.add",
@@ -181,333 +188,347 @@
       "renderType": "binary"
     },
     {
-      "netlistId": 228,
+      "netlistId": 230,
       "name": "testbench_fma16.dut.fmamul.p_fract",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 229,
+      "netlistId": 231,
       "name": "testbench_fma16.dut.fmamul.p_exp",
       "numberFormat": "signed",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 227,
+      "netlistId": 229,
       "name": "testbench_fma16.dut.fmamul.p_sign",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 290,
+      "netlistId": 292,
       "name": "testbench_fma16.dut.fmaadd.a_cnt",
       "numberFormat": "signed",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 285,
+      "netlistId": 287,
       "name": "testbench_fma16.dut.fmaadd.kill_z",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 286,
+      "netlistId": 288,
       "name": "testbench_fma16.dut.fmaadd.kill_prod",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 291,
+      "netlistId": 293,
       "name": "testbench_fma16.dut.fmaadd.z_preshift",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 292,
+      "netlistId": 294,
       "name": "testbench_fma16.dut.fmaadd.z_shifted",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 293,
+      "netlistId": 295,
       "name": "testbench_fma16.dut.fmaadd.a_fract",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 289,
+      "netlistId": 291,
       "name": "testbench_fma16.dut.fmaadd.a_sticky",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 287,
+      "netlistId": 289,
       "name": "testbench_fma16.dut.fmaadd.a_sign",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 288,
+      "netlistId": 290,
       "name": "testbench_fma16.dut.fmaadd.diff_sign",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 294,
+      "netlistId": 296,
       "name": "testbench_fma16.dut.fmaadd.aligned_p_fract",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 295,
+      "netlistId": 297,
       "name": "testbench_fma16.dut.fmaadd.pre_sum",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 296,
+      "netlistId": 298,
       "name": "testbench_fma16.dut.fmaadd.neg_pre_sum",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 297,
+      "netlistId": 299,
       "name": "testbench_fma16.dut.fmaadd.pos_sum",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 299,
+      "netlistId": 301,
       "name": "testbench_fma16.dut.fmaadd.s_fract",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 298,
+      "netlistId": 300,
       "name": "testbench_fma16.dut.fmaadd.s_fract_zero",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 300,
+      "netlistId": 302,
       "name": "testbench_fma16.dut.fmaadd.s_sign",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 281,
+      "netlistId": 283,
       "name": "testbench_fma16.dut.fmaadd.m_sign",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 301,
+      "netlistId": 303,
       "name": "testbench_fma16.dut.fmaadd.lzero",
       "numberFormat": "decimal",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 302,
+      "netlistId": 304,
       "name": "testbench_fma16.dut.fmaadd.m_cnt",
       "numberFormat": "signed",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 284,
+      "netlistId": 286,
       "name": "testbench_fma16.dut.fmaadd.m_shifted",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 283,
+      "netlistId": 285,
       "name": "testbench_fma16.dut.fmaadd.m_exp",
       "numberFormat": "signed",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 282,
+      "netlistId": 284,
       "name": "testbench_fma16.dut.fmaadd.m_fract",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 413,
-      "name": "testbench_fma16.dut.fmaround.overflow",
+      "netlistId": 70,
+      "name": "testbench_fma16.dut.roundmode",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 414,
-      "name": "testbench_fma16.dut.fmaround.rne",
-      "numberFormat": "binary",
-      "colorIndex": 0,
-      "renderType": "binary"
-    },
-    {
-      "netlistId": 415,
-      "name": "testbench_fma16.dut.fmaround.rz",
-      "numberFormat": "binary",
-      "colorIndex": 0,
-      "renderType": "binary"
-    },
-    {
-      "netlistId": 416,
-      "name": "testbench_fma16.dut.fmaround.rp",
-      "numberFormat": "binary",
-      "colorIndex": 0,
-      "renderType": "binary"
-    },
-    {
-      "netlistId": 417,
-      "name": "testbench_fma16.dut.fmaround.rn",
+      "netlistId": 70,
+      "name": "testbench_fma16.dut.roundmode",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
       "netlistId": 418,
+      "name": "testbench_fma16.dut.fmaround.rne",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 419,
+      "name": "testbench_fma16.dut.fmaround.rz",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 420,
+      "name": "testbench_fma16.dut.fmaround.rp",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 421,
+      "name": "testbench_fma16.dut.fmaround.rn",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 416,
       "name": "testbench_fma16.dut.fmaround.round_flags",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 419,
+      "netlistId": 422,
       "name": "testbench_fma16.dut.fmaround.round_op",
       "numberFormat": "decimal",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 420,
+      "netlistId": 423,
       "name": "testbench_fma16.dut.fmaround.m_fract_p1",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 421,
+      "netlistId": 424,
       "name": "testbench_fma16.dut.fmaround.m_exp_p1",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 466,
+      "netlistId": 476,
       "name": "testbench_fma16.dut.fmapost.result",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 467,
+      "netlistId": 477,
       "name": "testbench_fma16.dut.fmapost.invalid",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 468,
+      "netlistId": 478,
       "name": "testbench_fma16.dut.fmapost.overflow",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 469,
+      "netlistId": 479,
       "name": "testbench_fma16.dut.fmapost.underflow",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 470,
+      "netlistId": 480,
       "name": "testbench_fma16.dut.fmapost.inexact",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 471,
+      "netlistId": 481,
       "name": "testbench_fma16.dut.fmapost.nan",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 472,
+      "netlistId": 482,
       "name": "testbench_fma16.dut.fmapost.snan",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 473,
-      "name": "testbench_fma16.dut.fmapost.sub_inf",
-      "numberFormat": "binary",
-      "colorIndex": 0,
-      "renderType": "binary"
-    },
-    {
-      "netlistId": 474,
+      "netlistId": 483,
       "name": "testbench_fma16.dut.fmapost.zero_mul_inf",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 475,
+      "netlistId": 415,
+      "name": "testbench_fma16.dut.fmaround.round_overflow",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 486,
       "name": "testbench_fma16.dut.fmapost.p_inf",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "binary"
     },
     {
-      "netlistId": 410,
-      "name": "testbench_fma16.dut.fmaround.r_sign",
-      "numberFormat": "binary",
-      "colorIndex": 0,
-      "renderType": "binary"
-    },
-    {
-      "netlistId": 411,
+      "netlistId": 413,
       "name": "testbench_fma16.dut.fmaround.r_exp",
       "numberFormat": "decimal",
       "colorIndex": 0,
       "renderType": "multiBit"
     },
     {
-      "netlistId": 412,
+      "netlistId": 414,
       "name": "testbench_fma16.dut.fmaround.r_fract",
       "numberFormat": "binary",
       "colorIndex": 0,
       "renderType": "multiBit"
+    },
+    {
+      "netlistId": 417,
+      "name": "testbench_fma16.dut.fmaround.m_zero",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
+    },
+    {
+      "netlistId": 412,
+      "name": "testbench_fma16.dut.fmaround.r_sign",
+      "numberFormat": "binary",
+      "colorIndex": 0,
+      "renderType": "binary"
     }
   ]
 }

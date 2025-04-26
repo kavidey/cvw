@@ -25,7 +25,7 @@ module fmapost (
     output logic [`FLEN-1:0] result,
     output logic             invalid, overflow, underflow, inexact
 );
-    logic nan, snan, zero_mul_inf, sub_inf, p_inf;
+    logic nan, snan, zero_mul_inf, nan_mul_inf, sub_inf, p_inf;
     assign nan = x_nan | y_nan | z_nan; // anything is nan
     assign snan = x_snan | y_snan | z_snan; // anything is a signalling nan
     assign p_inf = x_inf | y_inf; // product is infinitiy

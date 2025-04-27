@@ -59,7 +59,7 @@ module fmaadd (
         else if (kill_z)
             a_sticky = ~(z_zero | (~add));
         else
-            a_sticky = |z_shifted[`NF-1:0];
+            a_sticky = |z_shifted[`NF:0];
     end
 
     ///// 5. Add the aligned significands: S_m = P_m + A_m /////

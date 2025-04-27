@@ -10,7 +10,7 @@
 `include "fma.vh"
 
 module fmaadd (
-    input  logic             negz, x_zero, y_zero, z_zero,
+    input  logic             add, mul, negz, x_zero, y_zero, z_zero,
     input  logic             z_sign, p_sign,
     input  logic [`NE-1:0]   z_exp,
     input  logic [`NF-1:0]   z_fract,
@@ -22,20 +22,28 @@ module fmaadd (
     output logic [4*`NF+5:0] m_shifted,
     output logic             kill_z, kill_prod, a_sign, diff_sign, a_sticky
 );
+        // if mul is 0 then set y=1
+    logic z_sign_add;
+    logic [`NE-1:0] z_exp_add;
+    logic [`NF-1:0] z_fract_add;
+    assign z_sign_add = add ? z_sign: 0;
+    assign z_exp_add = add ? z_exp: 0;
+    assign z_fract_add = add ? z_fract : 0;
+
     ///// 3. Determine the alignment shift count: A_cnt = P_e - Z_e /////
     logic signed [`NE+1:0] a_cnt;
-    assign a_cnt = p_exp - {1'b0, z_exp} + `NF + 2;
-    assign kill_z = (a_cnt > (3*`NF + 3)) | z_zero;
-    assign kill_prod = (a_cnt < 0) | x_zero | y_zero;
+    assign a_cnt = p_exp - {1'b0, z_exp_add} + `NF + 2;
+    assign kill_z = (a_cnt > (3*`NF + 3)) | (z_zero | (~add));
+    assign kill_prod = (a_cnt < 0) | x_zero | (y_zero & mul);
 
     ///// 4. Shift the significand of Z into alignment: A_m = Z_m >> A_cnt /////
     logic [`NF+2:0] z_preshift;
-    assign z_preshift = {1'b1, z_fract, 2'b00}; // preshift left by NF+2
+    assign z_preshift = {1'b1, z_fract_add, 2'b00}; // preshift left by NF+2
 
     logic [4*`NF+3:0] z_shifted;
     always_comb begin
         if (kill_prod)
-            z_shifted = {{`NF+2{1'b0}}, 1'b1, z_fract, {2*`NF+1{1'b0}}};
+            z_shifted = {{`NF+2{1'b0}}, 1'b1, z_fract_add, {2*`NF+1{1'b0}}};
         else if (kill_z)
             z_shifted = 0;
         else
@@ -47,15 +55,15 @@ module fmaadd (
 
     always_comb begin
         if (kill_prod)
-            a_sticky = ~(x_zero | y_zero);
+            a_sticky = ~(x_zero | (y_zero & mul));
         else if (kill_z)
-            a_sticky = ~z_zero;
+            a_sticky = ~(z_zero | (~add));
         else
             a_sticky = |z_shifted[`NF-1:0];
     end
 
     ///// 5. Add the aligned significands: S_m = P_m + A_m /////
-    assign a_sign = z_sign ^ negz;
+    assign a_sign = z_sign_add ^ negz;
     assign diff_sign = a_sign ^ p_sign; // 1 means they have different signs and we're doing effective subtraction
 
     logic [3*`NF+2:0] aligned_p_fract;
@@ -91,6 +99,6 @@ module fmaadd (
         if (s_fract_zero)
             m_exp = 0;
         else 
-            m_exp = kill_prod ? ({1'b0, z_exp} - {m_cnt[SHIFT_WIDTH-1], m_cnt}) : (p_exp - {m_cnt[SHIFT_WIDTH-1], m_cnt});
+            m_exp = kill_prod ? ({1'b0, z_exp_add} - {m_cnt[SHIFT_WIDTH-1], m_cnt}) : (p_exp - {m_cnt[SHIFT_WIDTH-1], m_cnt});
     end
 endmodule

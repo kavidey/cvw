@@ -42,7 +42,7 @@ module fma16 (
     logic [`NE+1:0] p_exp;
     fmamul fmamul(
         // auxiliary inputs
-        .negp, .x_zero, .y_zero,
+        .mul, .negp, .x_zero, .y_zero,
         // multiplicand inputs
         .x_sign, .x_exp, .x_fract,
         .y_sign, .y_exp, .y_fract,
@@ -62,7 +62,7 @@ module fma16 (
     logic kill_z, kill_prod, a_sign, diff_sign, a_sticky;
     fmaadd fmaadd(
         // auxiliary inputs
-        .negz, .x_zero, .y_zero, .z_zero,
+        .mul, .add, .negz, .x_zero, .y_zero, .z_zero,
         // addend inputs
         .z_sign, .z_exp, .z_fract,
         .p_sign, .p_exp, .p_fract,

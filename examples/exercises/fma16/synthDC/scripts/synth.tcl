@@ -28,6 +28,13 @@ set maxopt $::env(MAXOPT)
 set drive $::env(DRIVE)
 
 eval file copy -force [glob ${hdl_src}/fma16.sv] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/fma.vh] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/fmaadd.sv] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/fmamul.sv] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/fmapost.sv] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/fmaround.sv] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/priorityencoder.sv] {$outputDir/hdl/}
+eval file copy -force [glob ${hdl_src}/unpackfloat.sv] {$outputDir/hdl/}
 eval file copy -force [glob ${hdl_src}/fma16wrapper.sv] {$outputDir/hdl/}
 
 # Check if a wrapper is needed and create it (to pass parameters when cvw_t parameters are used)

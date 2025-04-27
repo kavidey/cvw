@@ -20,12 +20,11 @@ module fmaround (
     output logic             r_sign,
     output logic [`NE-1:0]   r_exp,
     output logic [`NF-1:0]   r_fract,
-    output logic             round_overflow,
+    output logic             round_overflow, m_zero,
     output logic [4:0]       round_flags
 );
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
-    logic m_zero;
     assign m_zero = ~((|m_fract) | (|m_exp));
 
     assign round_overflow = (m_exp > `EMAX);
@@ -138,5 +137,14 @@ module fmaround (
     end
 
     // r_sign = m_sign unless (result == 0.0 and rounding mode is rn) then r_sign = 1
-    assign r_sign = (m_zero & rn) ? 1 : m_sign;
+    // assign r_sign = (m_zero & rn) ? 1 : m_sign;
+    always_comb begin
+        if (m_zero)
+            if (diff_sign)
+                r_sign = 0;
+            else
+                r_sign = m_sign;
+        else
+            r_sign = m_sign;
+    end
 endmodule

@@ -17,7 +17,7 @@ module fmapost (
     input  logic             x_sign, y_sign, z_sign,
     input  logic             kill_z, kill_prod, a_sticky,
     input  logic             p_sign, a_sign, diff_sign, m_sign, r_sign,
-    input  logic             round_overflow,
+    input  logic             round_overflow, m_zero,
     input  logic [4:0]       round_flags,
     input  logic [`NE+1:0]   m_exp,
     input  logic [`NE-1:0]   r_exp,
@@ -64,6 +64,6 @@ module fmapost (
     
     assign invalid = (x_snan | y_snan | z_snan) | zero_mul_inf | (sub_inf & (~(x_nan | y_nan))); // todo improve logic
     assign overflow = round_overflow & (~(invalid | kill_flags));
-    assign underflow = 0;
+    assign underflow = m_zero & inexact;
     assign inexact = (a_sticky | overflow | (|round_flags[1:0])) & (~(invalid | kill_flags));
 endmodule

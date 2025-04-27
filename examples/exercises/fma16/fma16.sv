@@ -73,7 +73,7 @@ module fma16 (
     );
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
-    logic round_overflow;
+    logic round_overflow, m_zero;
     logic [4:0] round_flags;
     logic r_sign;
     logic [`NE-1:0] r_exp;
@@ -87,7 +87,7 @@ module fma16 (
         // rounded output
         .r_sign, .r_exp, .r_fract,
         // auxiliary outputs
-        .round_overflow, .round_flags
+        .round_overflow, .m_zero, .round_flags
     );
 
     ///// 9. Handle flags and special cases: W = specialcase(R, X, Y, Z) /////
@@ -101,7 +101,7 @@ module fma16 (
         .x_sign, .y_sign, .z_sign,
         .kill_z, .kill_prod, .a_sticky,
         .p_sign, .a_sign, .diff_sign, .m_sign, .r_sign,
-        .round_overflow, .round_flags,
+        .round_overflow, .m_zero, .round_flags,
         .m_exp,
         .r_exp,
         .r_fract,

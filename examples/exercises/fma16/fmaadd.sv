@@ -92,13 +92,16 @@ module fmaadd (
 
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
     assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
-    // assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
 
     always_comb begin
         if (kill_prod & kill_z) begin
-            m_sign = s_sign;
             m_exp = 0;
             m_fract = 0;
+
+            if (diff_sign & ((|m_shifted[2*`NF+1:0]) | a_sticky))
+                m_sign = p_sign;
+            else
+                m_sign = s_sign;
         end
         else begin
             m_fract = m_shifted[3*`NF+1:2*`NF+2];

@@ -26,13 +26,13 @@ module fmapost (
     output logic             invalid, overflow, underflow, inexact
 );
     logic nan, snan, zero_mul_inf, nan_mul_inf, sub_inf, p_inf;
-    assign nan = x_nan | (y_nan & mul) | z_nan; // anything is nan
-    assign snan = x_snan | (y_snan & mul) | z_snan; // anything is a signalling nan
+    assign nan = x_nan | (y_nan & mul) | (z_nan & add); // anything is nan
+    assign snan = x_snan | (y_snan & mul) | (z_snan & add); // anything is a signalling nan
     assign p_inf = x_inf | (y_inf & mul); // product is infinitiy
 
     assign zero_mul_inf = (x_zero & (y_inf & mul)) | ((y_zero & mul) & x_inf);
     assign nan_mul_inf = (x_nan & (y_inf & mul)) | ((y_nan & mul) & x_inf);
-    assign sub_inf = (p_inf & z_inf & diff_sign);
+    assign sub_inf = (p_inf & (z_inf & add) & diff_sign);
 
     // check for invalid combinations
     logic kill_flags;
@@ -41,11 +41,11 @@ module fmapost (
             result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
             kill_flags = 1;
         end
-        else if (p_inf & (~z_inf)) begin// x or y are inf but not z
+        else if (p_inf & (~(z_inf & add))) begin// x or y are inf but not z
             result = {p_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of x*y
             kill_flags = 1;
         end
-        else if (~p_inf & z_inf) begin // z is inf but not x and y
+        else if (~p_inf & (z_inf & add)) begin // z is inf but not x and y
             result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
             kill_flags = 1;
         end
@@ -53,7 +53,7 @@ module fmapost (
             result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
             kill_flags = 1;
         end
-        else if (p_inf & z_inf & (~diff_sign)) begin // effective addition of inf
+        else if (p_inf & (z_inf & add) & (~diff_sign)) begin // effective addition of inf
             result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
             kill_flags = 1;
         end
@@ -63,7 +63,7 @@ module fmapost (
         end
     end
     
-    assign invalid = (x_snan | (y_snan & mul) | z_snan) | zero_mul_inf | (sub_inf & (~(x_nan | (y_nan & mul)))); // todo improve logic
+    assign invalid = (x_snan | (y_snan & mul) | (z_snan & add)) | zero_mul_inf | (sub_inf & (~(x_nan | (y_nan & mul)))); // todo improve logic
     assign overflow = round_overflow & (~(invalid | kill_flags));
     assign underflow = m_zero & inexact;
     assign inexact = (a_sticky | overflow | (|round_flags[1:0])) & (~(invalid | kill_flags));

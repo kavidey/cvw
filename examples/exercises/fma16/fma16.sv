@@ -94,15 +94,15 @@ module fma16 (
     logic invalid, overflow, underflow, inexact;
     fmapost fmapost(
         // inputs
+        .mul, .add,
         .x_zero, .y_zero, .z_zero,
         .x_inf, .y_inf, .z_inf,
         .x_nan, .y_nan, .z_nan,
         .x_snan, .y_snan, .z_snan,
         .x_sign, .y_sign, .z_sign,
         .kill_z, .kill_prod, .a_sticky,
-        .p_sign, .a_sign, .diff_sign, .m_sign, .r_sign,
+        .p_sign, .a_sign, .diff_sign, .r_sign,
         .round_overflow, .m_zero, .round_flags,
-        .m_exp,
         .r_exp,
         .r_fract,
         // outputs

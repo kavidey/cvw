@@ -22,7 +22,7 @@ module fmaadd (
     output logic [4*`NF+5:0] m_shifted,
     output logic             kill_z, kill_prod, a_sign, diff_sign, a_sticky
 );
-        // if mul is 0 then set y=1
+    // if mul is 0 then set y=1
     logic z_sign_add;
     logic [`NE-1:0] z_exp_add;
     logic [`NF-1:0] z_fract_add;

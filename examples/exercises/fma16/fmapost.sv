@@ -34,6 +34,7 @@ module fmapost (
     assign nan_mul_inf = (x_nan & y_inf) | (y_nan & x_inf);
     assign sub_inf = (p_inf & z_inf & diff_sign);
 
+    // check for invalid combinations
     logic kill_flags;
     always_comb begin
         if (nan | zero_mul_inf) begin // any inputs are nan OR (0 * inf)
@@ -48,7 +49,7 @@ module fmapost (
             result = {a_sign, {`NE{1'b1}}, {`NF{1'b0}}}; // inf with sign of z
             kill_flags = 1;
         end
-        else if (sub_inf) begin // effective subtraction of inf
+        else if (sub_inf) begin // effective subtraction of infs
             result = {1'b0, {`NE{1'b1}}, 1'b1, {(`NF-1){1'b0}}}; // nan
             kill_flags = 1;
         end

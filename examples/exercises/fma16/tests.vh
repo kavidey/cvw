@@ -23,10 +23,10 @@ string fma_tests[] = {
 };
 
 string special_tests[] = {
-    // "fma_special_rm.tv"
+    "fma_special_rm.tv"
     // "fma_special_rne.tv"
-    // "fma_special_rp.tv",
-    "fma_special_rz.tv"
+    // "fma_special_rp.tv"
+    // "fma_special_rz.tv"
 };
 
 string extra_tests[] = {

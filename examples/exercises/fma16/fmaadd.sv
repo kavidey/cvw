@@ -83,7 +83,6 @@ module fmaadd (
 
     logic s_sign;
     assign s_sign = diff_sign ? a_sign ^ pos_sum : a_sign;
-    assign m_sign = s_fract_zero ? 0 : s_sign; // if the sum cancelled out to 0 then we need to set the sign to positive
 
     ///// 6. Find the leading 1 for normalization shift: Mcnt = # of bits to shift /////
     localparam SHIFT_WIDTH = $clog2(3*`NF+4);
@@ -93,12 +92,26 @@ module fmaadd (
 
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
     assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
-    assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
+    // assign m_fract = m_shifted[3*`NF+1:2*`NF+2];
 
     always_comb begin
-        if (s_fract_zero)
+        if (kill_prod & kill_z) begin
+            m_sign = s_sign;
             m_exp = 0;
-        else 
-            m_exp = kill_prod ? ({1'b0, z_exp_add} - {m_cnt[SHIFT_WIDTH-1], m_cnt}) : (p_exp - {m_cnt[SHIFT_WIDTH-1], m_cnt});
+            m_fract = 0;
+        end
+        else begin
+            m_fract = m_shifted[3*`NF+1:2*`NF+2];
+
+            // if the sum cancelled out then set the sign and exponent to 0
+            if (s_fract_zero) begin
+                m_sign = 0;
+                m_exp = 0;
+            end
+            else begin 
+                m_sign = s_sign;
+                m_exp = kill_prod ? ({1'b0, z_exp_add} - {m_cnt[SHIFT_WIDTH-1], m_cnt}) : (p_exp - {m_cnt[SHIFT_WIDTH-1], m_cnt});
+            end
+        end
     end
 endmodule

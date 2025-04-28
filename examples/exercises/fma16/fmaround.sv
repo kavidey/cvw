@@ -12,7 +12,7 @@
 module fmaround (
     input  logic [1:0]       roundmode,
     input  logic             kill_prod, kill_z,
-    input  logic             diff_sign, a_sticky,
+    input  logic             diff_sign, a_sticky, p_sign,
     input  logic             m_sign,
     input  logic [`NF-1:0]   m_fract,
     input  logic [`NE+1:0]   m_exp,
@@ -136,12 +136,13 @@ module fmaround (
         endcase
     end
 
-    // r_sign = m_sign unless (result == 0.0 and rounding mode is rn) then r_sign = 1
-    // assign r_sign = (m_zero & rn) ? 1 : m_sign;
     always_comb begin
         if (m_zero)
             if (diff_sign)
-                r_sign = 0;
+                if (kill_z & (|round_flags[1:0])) // if z is 0 and x*y is non zero (but rounded to 0) use sign of x*y
+                    r_sign = p_sign;
+                else
+                    r_sign = 0;
             else
                 r_sign = m_sign;
         else

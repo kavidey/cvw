@@ -81,7 +81,7 @@ module fma16 (
     fmaround fmaround (
         .roundmode,
         // auxiliary inputs
-        .kill_prod, .kill_z, .diff_sign, .a_sticky,
+        .kill_prod, .kill_z, .diff_sign, .a_sticky, .p_sign,
         // sum input
         .m_sign, .m_exp, .m_fract, .m_shifted,
         // rounded output

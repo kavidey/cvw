@@ -269,10 +269,10 @@ int main()
     genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rz", "// Multiply-Add with zero, NaN, and infinity, RZ", 0b00, 1, 1, 1);
     softfloat_roundingMode = softfloat_round_near_even;
     genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rne", "// Multiply-Add with zero, NaN, and infinity, RNE", 0b01, 1, 1, 1);
-    softfloat_roundingMode = softfloat_round_max;
-    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rp", "// Multiply-Add with zero, NaN, and infinity, RP", 0b10, 1, 1, 1);
     softfloat_roundingMode = softfloat_round_min;
-    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rn", "// Multiply-Add with zero, NaN, and infinity, RN", 0b11, 1, 1, 1);
+    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rn", "// Multiply-Add with zero, NaN, and infinity, RN", 0b10, 1, 1, 1);
+    softfloat_roundingMode = softfloat_round_max;
+    genMulAddTests(smlExponents, smlFracts, 1, "fma_special_rp", "// Multiply-Add with zero, NaN, and infinity, RP", 0b11, 1, 1, 1);
 
     // Test cases: custom special tests
     softfloat_roundingMode = softfloat_round_minMag;

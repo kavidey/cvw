@@ -20,7 +20,7 @@ module fmaadd (
     output logic [`NF-1:0]   m_fract,
     output logic [`NE+1:0]   m_exp,
     output logic [4*`NF+5:0] m_shifted,
-    output logic             kill_z, kill_prod, a_sign, diff_sign, a_sticky
+    output logic             kill_z, kill_prod, a_sign, diff_sign, a_sticky, kill_guard
 );
     // if mul is 0 then set y=1
     logic z_sign_add;
@@ -92,6 +92,8 @@ module fmaadd (
 
     ///// 7. Shift the result to renormalize: Mm = Sm << Mcnt; Me = Pe - Mcnt /////
     assign m_shifted = {{`NF+2{1'b0}}, s_fract} << (`NF + 2 + $signed(m_cnt));
+
+    assign kill_guard = (z_fract == 0) & (diff_sign & kill_prod) & ((a_cnt == {(`NE+2){1'b1}}) & p_fract[2*`NF+1]);
 
     always_comb begin
         if (kill_prod & kill_z) begin

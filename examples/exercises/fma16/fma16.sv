@@ -59,7 +59,7 @@ module fma16 (
     logic [`NF-1:0] m_fract;
     logic [`NE+1:0] m_exp;
     logic [4*`NF+5:0] m_shifted;
-    logic kill_z, kill_prod, a_sign, diff_sign, a_sticky;
+    logic kill_z, kill_prod, a_sign, diff_sign, a_sticky, kill_guard;
     fmaadd fmaadd(
         // auxiliary inputs
         .mul, .add, .negz, .x_zero, .y_zero, .z_zero,
@@ -69,7 +69,7 @@ module fma16 (
         // sum output
         .m_sign, .m_exp, .m_fract, .m_shifted,
         // auxiliary outputs
-        .kill_z, .kill_prod, .a_sign, .diff_sign, .a_sticky
+        .kill_z, .kill_prod, .a_sign, .diff_sign, .a_sticky, .kill_guard
     );
 
     ///// 8. Round the result and handle special cases: R = round(M) /////
@@ -81,7 +81,7 @@ module fma16 (
     fmaround fmaround (
         .roundmode,
         // auxiliary inputs
-        .kill_prod, .kill_z, .diff_sign, .a_sticky, .p_sign,
+        .kill_prod, .kill_z, .diff_sign, .a_sticky, .p_sign, .kill_guard,
         // sum input
         .m_sign, .m_exp, .m_fract, .m_shifted,
         // rounded output

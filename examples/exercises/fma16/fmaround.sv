@@ -12,7 +12,7 @@
 module fmaround (
     input  logic [1:0]       roundmode,
     input  logic             kill_prod, kill_z,
-    input  logic             diff_sign, a_sticky, p_sign,
+    input  logic             diff_sign, a_sticky, p_sign, kill_guard,
     input  logic             m_sign,
     input  logic [`NF-1:0]   m_fract,
     input  logic [`NE+1:0]   m_exp,
@@ -37,7 +37,7 @@ module fmaround (
     assign rp = roundmode == 2'b11; // round up (toward positive infinity)
 
     // sign_overflow_L_G_sticky
-    assign round_flags = {m_sign, round_overflow_orig, m_shifted[2*`NF+2], m_shifted[2*`NF+1], (|m_shifted[2*`NF:0]) | a_sticky};
+    assign round_flags = {m_sign, round_overflow_orig, m_shifted[2*`NF+2], m_shifted[2*`NF+1] & ~kill_guard, (|m_shifted[2*`NF:0]) | a_sticky};
     // logic [2:0] round_op;
     enum {TRUNC, RND, P_INF, N_INF, P_MAXNUM, N_MAXNUM} round_op;
 
@@ -88,10 +88,6 @@ module fmaround (
             5'b1_0_?_1_1:
                 if (rne | rn)
                     round_op = RND; 
-                    // if (rne & (a_sticky & diff_sign))
-                    //     round_op = TRUNC;
-                    // else
-                    //     round_op = RND;
                 else
                     round_op = TRUNC;
             5'b1_1_?_?_?:

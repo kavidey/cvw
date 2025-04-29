@@ -1,5 +1,5 @@
 ///////////////////////////////////////////
-// unpack float
+// unpackfloat
 //
 // Written: Kavi Dey kdey@hmc.edu
 // Created: Mar 25, 2025

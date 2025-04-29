@@ -1,5 +1,5 @@
 ///////////////////////////////////////////
-// fmamul
+// fmaadd
 //
 // Written: Kavi Dey kdey@hmc.edu
 // Created: Feb 8, 2025

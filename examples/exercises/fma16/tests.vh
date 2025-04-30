@@ -47,9 +47,9 @@ string special_tests[] = {
 
 string extra_tests[] = {
     "../work/custom_0.tv",
-    // "../work/random_rz.tv",
-    // "../work/random_rne.tv",
-    // "../work/random_rn.tv",
-    // "../work/random_rp.tv",
+    "../work/random_rz.tv",
+    "../work/random_rne.tv",
+    "../work/random_rn.tv",
+    "../work/random_rp.tv",
     "../tests/baby_torture.tv"
 };

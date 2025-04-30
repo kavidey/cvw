@@ -98,9 +98,23 @@ void genCase(FILE *fptr, float16_t x, float16_t y, float16_t z, int mul, int add
 
     // omit denorms, which aren't required for this project
     smallest.v = 0x0400;
+    // x denorm
+    float16_t xmag = x;
+    xmag.v &= 0x7FFF; // take absolute value
+    if (f16_lt(xmag, smallest) && (xmag.v != 0x0000)) fprintf (fptr, "// skip denorm: ");
+    // y denorm
+    float16_t ymag = y;
+    ymag.v &= 0x7FFF; // take absolute value
+    if (f16_lt(ymag, smallest) && (ymag.v != 0x0000)) fprintf (fptr, "// skip denorm: ");
+    // z denorm
+    float16_t zmag = z;
+    zmag.v &= 0x7FFF; // take absolute value
+    if (f16_lt(zmag, smallest) && (zmag.v != 0x0000)) fprintf (fptr, "// skip denorm: ");
+    // result denorm
     float16_t resultmag = result;
     resultmag.v &= 0x7FFF; // take absolute value
     if (f16_lt(resultmag, smallest) && (resultmag.v != 0x0000)) fprintf (fptr, "// skip denorm: ");
+    // skip underflow
     if ((softfloat_exceptionFlags >> 1) % 2) fprintf(fptr, "// skip underflow: ");
 
     // skip special cases if requested
@@ -291,11 +305,11 @@ int main()
     softfloat_roundingMode = softfloat_round_minMag;
     genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rz", "// Randomy generated test cases, RZ", 0b00);
     softfloat_roundingMode = softfloat_round_near_even;
-    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rne", "// Randomy generated test cases, RNE", 0b00);
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rne", "// Randomy generated test cases, RNE", 0b01);
     softfloat_roundingMode = softfloat_round_min;
-    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rn", "// Randomy generated test cases, RN", 0b00);
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rn", "// Randomy generated test cases, RN", 0b10);
     softfloat_roundingMode = softfloat_round_max;
-    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rp", "// Randomy generated test cases, RP", 0b00);
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rp", "// Randomy generated test cases, RP", 0b11);
 
     return 0;
 }

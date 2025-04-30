@@ -13,16 +13,10 @@ localparam TEST_FMA = 1;
 localparam TEST_SPECIAL = 1;
 localparam TEST_EXTRA = 1;
 
-// localparam TEST_MUL = 1;
-// localparam TEST_ADD = 0;
-// localparam TEST_FMA = 0;
-// localparam TEST_SPECIAL = 0;
-// localparam TEST_EXTRA = 0;
-
 string mul_tests[] = {
-    "fmul_0.tv"
-    // "fmul_1.tv",
-    // "fmul_2.tv"
+    "fmul_0.tv",
+    "fmul_1.tv",
+    "fmul_2.tv"
 };
 
 string add_tests[] = {
@@ -51,5 +45,6 @@ string extra_tests[] = {
     "../work/random_rne.tv",
     "../work/random_rn.tv",
     "../work/random_rp.tv",
-    "../tests/baby_torture.tv"
+    "../tests/baby_torture.tv",
+    "../tests/torture.tv"
 };

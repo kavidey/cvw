@@ -66,5 +66,5 @@ module fmapost (
     assign invalid = (x_snan | (y_snan & mul) | (z_snan & add)) | zero_mul_inf | (sub_inf & (~(x_nan | (y_nan & mul)))); // todo improve logic
     assign overflow = round_overflow & (~(invalid | kill_flags));
     assign underflow = m_zero & inexact;
-    assign inexact = (a_sticky | overflow | (|round_flags[1:0])) & (~(invalid | kill_flags));
+    assign inexact = (overflow | (|round_flags[1:0])) & (~(invalid | kill_flags));
 endmodule

@@ -288,7 +288,14 @@ int main()
         r = rand();
         memcpy(&random_z[i], (int16_t*) &r, 2);
     }
-    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_0", "// Randomy generated test cases", 0b00);
+    softfloat_roundingMode = softfloat_round_minMag;
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rz", "// Randomy generated test cases, RZ", 0b00);
+    softfloat_roundingMode = softfloat_round_near_even;
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rne", "// Randomy generated test cases, RNE", 0b00);
+    softfloat_roundingMode = softfloat_round_min;
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rn", "// Randomy generated test cases, RN", 0b00);
+    softfloat_roundingMode = softfloat_round_max;
+    genCustomTests(random_x, random_y, random_z, NUM_RAND_TESTS, "random_rp", "// Randomy generated test cases, RP", 0b00);
 
     return 0;
 }

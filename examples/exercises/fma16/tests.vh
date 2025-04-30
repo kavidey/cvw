@@ -16,7 +16,7 @@ localparam TEST_EXTRA = 1;
 // localparam TEST_MUL = 1;
 // localparam TEST_ADD = 0;
 // localparam TEST_FMA = 0;
-// localparam TEST_SPECIAL = 1;
+// localparam TEST_SPECIAL = 0;
 // localparam TEST_EXTRA = 0;
 
 string mul_tests[] = {
@@ -46,5 +46,10 @@ string special_tests[] = {
 };
 
 string extra_tests[] = {
+    "../work/custom_0.tv",
+    // "../work/random_rz.tv",
+    // "../work/random_rne.tv",
+    // "../work/random_rn.tv",
+    // "../work/random_rp.tv",
     "../tests/baby_torture.tv"
 };

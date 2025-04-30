@@ -17,8 +17,8 @@ module fmamul (
     input  logic [`NE-1:0]   x_exp, y_exp,     // X and Y exponent
     input  logic [`NF-1:0]   x_fract, y_fract, // X and Y mantissa
     output logic             p_sign,           // Product sign
-    output logic [`NE+1:0]   p_exp             // Product exponent
-    output logic [2*`NF+1:0] p_fract,          // Product mantissa
+    output logic [`NE+1:0]   p_exp,            // Product exponent
+    output logic [2*`NF+1:0] p_fract          // Product mantissa
 );
     // if mul is 0 then set y=1
     logic y_sign_mul;

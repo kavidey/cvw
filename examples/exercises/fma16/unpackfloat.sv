@@ -10,19 +10,22 @@
 `include "fma.vh"
 
 module unpackfloat(
-    input  logic [`FLEN-1:0] f,
-    output logic              sign,
-    output logic [`NE-1:0]    exp,
-    output logic [`NF-1:0]    fract,
-    output logic              zero, inf, nan, snan
+    input  logic [`FLEN-1:0] f,                    // Input float
+    output logic              sign,                // Output sign
+    output logic [`NE-1:0]    exp,                 // Output exponent
+    output logic [`NF-1:0]    fract,               // Output mantissa
+    output logic              zero, inf, nan, snan // Output flags
 );
+    // split up f into sign, exponent, and mantissa
     assign {sign, exp, fract} = f;
 
+    // auxiliary singals used to calculate flags
     logic exp_nonzero, fract_zero, max_exponent;
     assign exp_nonzero = |exp;
     assign fract_zero = fract == 0;
-    assign max_exponent = &exp; // exp == 5'b11111;
+    assign max_exponent = &exp;
 
+    // calculate flags
     assign zero = (~exp_nonzero) & fract_zero;
     assign inf = max_exponent & fract_zero;
     assign nan = max_exponent & (~fract_zero);

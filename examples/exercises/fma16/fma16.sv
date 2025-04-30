@@ -10,16 +10,16 @@
 `include "fma.vh"
 
 module fma16 (
-    input  logic [`FLEN-1:0] x,
-    input  logic [`FLEN-1:0] y,
-    input  logic [`FLEN-1:0] z,
-    input  logic             mul,
-    input  logic             add,
-    input  logic             negp,
-    input  logic             negz,
-    input  logic [1:0]       roundmode,
-    output logic [`FLEN-1:0] result,
-    output logic [3:0]       flags
+    input  logic [`FLEN-1:0] x,         // Input float X
+    input  logic [`FLEN-1:0] y,         // Input float Y
+    input  logic [`FLEN-1:0] z,         // Input float Z
+    input  logic             mul,       // Whether to multiply
+    input  logic             add,       // Whether to add
+    input  logic             negp,      // Invert product sign
+    input  logic             negz,      // Invert addend sign
+    input  logic [1:0]       roundmode, // Rounding mode to use
+    output logic [`FLEN-1:0] result,    // Output float
+    output logic [3:0]       flags      // Output flags
 );
     logic x_sign, y_sign, z_sign;
     logic [`NE-1:0] x_exp, y_exp, z_exp;
